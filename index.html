@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>出款凭证生成器</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="toolbar" aria-label="生成器操作">
+        <div>
+          <h1>出款凭证生成器</h1>
+          <p>根据你司真实出款记录生成付款确认单，用于客户回执、出款确认和内部留档。</p>
+        </div>
+        <div class="actions">
+          <button type="button" class="secondary" id="resetDemoBtn">恢复默认</button>
+          <button type="button" class="secondary" id="newOrderBtn">重新编号</button>
+          <button type="button" id="exportPngBtn">导出图片</button>
+          <button type="button" id="exportPdfBtn">导出 PDF</button>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <form class="panel controls" id="receiptForm">
+          <div class="form-section">
+            <div class="section-title">
+              <h2>交易信息</h2>
+              <span>状态、方式、币种用选择，其余按实际展示填写</span>
+            </div>
+            <label>
+              <span>凭证语言</span>
+              <select name="language">
+                <option value="zh">中文</option>
+                <option value="en">English</option>
+              </select>
+            </label>
+            <label>
+              <span>交易状态</span>
+              <select name="status">
+                <option>处理中</option>
+                <option>已完成</option>
+                <option>待确认</option>
+                <option>已取消</option>
+              </select>
+            </label>
+            <label>
+              <span>订单编号</span>
+              <input name="orderNo" inputmode="numeric" maxlength="24" />
+            </label>
+            <div class="field-grid two">
+              <label>
+                <span>交易发起日期</span>
+                <input name="startedAt" type="datetime-local" step="1" />
+              </label>
+              <label>
+                <span>交易完成日期</span>
+                <input name="completedAt" type="datetime-local" step="1" />
+              </label>
+            </div>
+            <div class="field-grid three">
+              <label>
+                <span>金额</span>
+                <input name="amount" type="number" min="0" step="0.01" />
+              </label>
+              <label>
+                <span>支付币种</span>
+                <select name="payCurrency">
+                  <option>USD</option>
+                  <option>HKD</option>
+                  <option>CNY</option>
+                  <option>EUR</option>
+                  <option>GBP</option>
+                  <option>SGD</option>
+                </select>
+              </label>
+              <label>
+                <span>收款币种</span>
+                <select name="receiveCurrency">
+                  <option>USD</option>
+                  <option>HKD</option>
+                  <option>CNY</option>
+                  <option>EUR</option>
+                  <option>GBP</option>
+                  <option>SGD</option>
+                </select>
+              </label>
+            </div>
+            <div class="field-grid three">
+              <label>
+                <span>支付方式</span>
+                <select name="paymentMethod">
+                  <option>SWIFT</option>
+                  <option>CHATS</option>
+                  <option>Bank Transfer</option>
+                  <option>Telegraphic Transfer</option>
+                  <option>FPS</option>
+                  <option>Wallet Transfer</option>
+                </select>
+              </label>
+              <label>
+                <span>手续费</span>
+                <input name="fee" type="number" min="0" step="0.01" />
+              </label>
+              <label>
+                <span>手续费币种</span>
+                <select name="feeCurrency">
+                  <option>USD</option>
+                  <option>HKD</option>
+                  <option>CNY</option>
+                  <option>EUR</option>
+                  <option>GBP</option>
+                  <option>SGD</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              <span>交易附言</span>
+              <input name="memo" maxlength="120" placeholder="例如 Invoice 20260702 / Contract payment" />
+            </label>
+          </div>
+
+          <div class="form-section">
+            <div class="section-title">
+              <h2>付款方</h2>
+            </div>
+            <label>
+              <span>付款方名称</span>
+              <input name="payerName" maxlength="80" />
+            </label>
+            <div class="field-grid two">
+              <label>
+                <span>编号标签</span>
+                <select name="payerIdLabel">
+                  <option>公司ID</option>
+                  <option>客户编号</option>
+                  <option>账户号码</option>
+                </select>
+              </label>
+              <label>
+                <span>编号</span>
+                <div class="input-action">
+                  <input name="payerId" maxlength="40" />
+                  <button type="button" class="secondary mini" id="randomPayerIdBtn">随机</button>
+                </div>
+              </label>
+            </div>
+            <label>
+              <span>付款参考号</span>
+              <div class="input-action">
+                <input name="payerRef" maxlength="40" />
+                <button type="button" class="secondary mini" id="randomPayerRefBtn">随机</button>
+              </div>
+            </label>
+            <label>
+              <span>付款方验证文案</span>
+              <input name="payerVerify" maxlength="80" />
+            </label>
+          </div>
+
+          <div class="form-section">
+            <div class="section-title">
+              <h2>收款方</h2>
+            </div>
+            <label>
+              <span>收款方名称</span>
+              <input name="recipientName" maxlength="80" />
+            </label>
+            <div class="field-grid two">
+              <label>
+                <span>账户标签</span>
+                <select name="recipientAccountLabel">
+                  <option>账户号码</option>
+                  <option>银行账号</option>
+                  <option>钱包号码</option>
+                  <option>IBAN</option>
+                </select>
+              </label>
+              <label>
+                <span>账户号码</span>
+                <input name="recipientAccount" maxlength="40" />
+              </label>
+            </div>
+            <label>
+              <span>收款方类型</span>
+              <select name="recipientType">
+                <option>Individual</option>
+                <option>Company</option>
+              </select>
+            </label>
+            <label>
+              <span>收款方验证文案</span>
+              <input name="recipientVerify" maxlength="80" />
+            </label>
+          </div>
+
+          <div class="form-section">
+            <div class="section-title">
+              <h2>收款摘要</h2>
+            </div>
+            <label>
+              <span>收款金额</span>
+              <input name="receiveAmount" type="number" min="0" step="0.01" />
+            </label>
+          </div>
+        </form>
+
+        <section class="preview-column" aria-label="出款凭证预览">
+          <div class="preview-head">
+            <h2>实时预览</h2>
+            <span id="saveState">已同步</span>
+          </div>
+          <article class="receipt" id="receiptPreview">
+            <header class="receipt-top">
+              <div><span data-i18n="statusLabel">交易状态:</span> <strong data-preview="status"></strong></div>
+              <div><span data-i18n="orderNoLabel">订单编号:</span> <strong data-preview="orderNo"></strong></div>
+            </header>
+
+            <section class="receipt-section">
+              <h3 data-i18n="transactionDetails">交易详情</h3>
+              <div class="detail-table">
+                <div class="detail-row">
+                  <span data-i18n="startedAt">交易发起日期</span>
+                  <strong data-preview="startedAtDisplay"></strong>
+                </div>
+                <div class="detail-row">
+                  <span data-i18n="completedAt">交易完成日期</span>
+                  <strong data-preview="completedAtDisplay"></strong>
+                </div>
+                <div class="detail-row">
+                  <span data-i18n="amount">金额</span>
+                  <strong data-preview="amountDisplay"></strong>
+                </div>
+                <div class="detail-row">
+                  <span data-i18n="paymentMethod">支付方式</span>
+                  <strong data-preview="paymentMethod"></strong>
+                </div>
+                <div class="detail-row">
+                  <span data-i18n="fee">手续费</span>
+                  <strong data-preview="feeDisplay"></strong>
+                </div>
+                <div class="detail-row">
+                  <span data-i18n="memo">交易附言</span>
+                  <strong data-preview="memo"></strong>
+                </div>
+              </div>
+            </section>
+
+            <section class="party-grid">
+              <div class="receipt-section">
+                <h3 data-i18n="payer">付款方</h3>
+                <div class="party-card">
+                  <strong class="party-name" data-preview="payerName"></strong>
+                  <span class="label-line" data-preview="payerIdLabelDisplay"></span>
+                  <strong data-preview="payerId"></strong>
+                  <span class="label-line" data-i18n="paymentReference">付款参考号:</span>
+                  <strong data-preview="payerRef"></strong>
+                  <p data-preview="payerVerify"></p>
+                </div>
+              </div>
+              <div class="receipt-section">
+                <h3 data-i18n="recipient">收款方</h3>
+                <div class="party-card">
+                  <strong class="party-name" data-preview="recipientName"></strong>
+                  <span class="label-line" data-preview="recipientAccountLabelDisplay"></span>
+                  <strong data-preview="recipientAccount"></strong>
+                  <span class="label-line" data-i18n="recipientType">收款方类型:</span>
+                  <strong data-preview="recipientType"></strong>
+                  <p data-preview="recipientVerify"></p>
+                </div>
+              </div>
+            </section>
+
+            <section class="receipt-section">
+              <h3 data-i18n="paymentSummary">支付摘要</h3>
+              <div class="summary-table">
+                <div class="summary-row header">
+                  <span data-i18n="payCurrency">支付币种</span>
+                  <span data-i18n="payAmount">支付金额</span>
+                  <span data-i18n="receiveCurrency">收款币种</span>
+                  <span data-i18n="receiveAmount">收款金额</span>
+                </div>
+                <div class="summary-row">
+                  <strong data-preview="payCurrency"></strong>
+                  <strong data-preview="amountDisplay"></strong>
+                  <strong data-preview="receiveCurrency"></strong>
+                  <strong data-preview="receiveAmountDisplay"></strong>
+                </div>
+                <div class="summary-row total">
+                  <span data-i18n="totalLabel">总计:</span>
+                  <strong data-preview="amountWithCurrency"></strong>
+                  <span data-i18n="totalLabel">总计:</span>
+                  <strong data-preview="receiveAmountWithCurrency"></strong>
+                </div>
+              </div>
+            </section>
+
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
