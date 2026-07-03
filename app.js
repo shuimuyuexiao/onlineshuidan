@@ -7,6 +7,7 @@ const exportPngBtn = document.querySelector("#exportPngBtn");
 const exportPdfBtn = document.querySelector("#exportPdfBtn");
 const randomPayerIdBtn = document.querySelector("#randomPayerIdBtn");
 const randomPayerRefBtn = document.querySelector("#randomPayerRefBtn");
+const payerIdStorageKey = "payoutGenerator.payerIdsByPayerName";
 
 const defaults = {
   language: "zh",
@@ -127,9 +128,9 @@ function getReceiptCopy(language) {
 }
 
 function randomNumber(max) {
-  if (crypto?.getRandomValues) {
+  if (globalThis.crypto?.getRandomValues) {
     const values = new Uint32Array(1);
-    crypto.getRandomValues(values);
+    globalThis.crypto.getRandomValues(values);
     return values[0] % max;
   }
   return Math.floor(Math.random() * max);
@@ -152,10 +153,55 @@ function generatePayerId(label) {
   return randomDigits(12);
 }
 
-function generatePayerReference() {
-  const now = new Date();
-  const date = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
-  return `${date}${randomDigits(12)}`;
+function readStoredPayerIds() {
+  try {
+    return JSON.parse(globalThis.localStorage?.getItem(payerIdStorageKey) || "{}");
+  } catch (error) {
+    return {};
+  }
+}
+
+function writeStoredPayerIds(values) {
+  try {
+    globalThis.localStorage?.setItem(payerIdStorageKey, JSON.stringify(values));
+  } catch (error) {
+    // The generator still works if local storage is unavailable.
+  }
+}
+
+function getPayerIdentityKey() {
+  return form.elements.payerName.value.trim().toUpperCase();
+}
+
+function saveCurrentPayerId() {
+  const payerKey = getPayerIdentityKey();
+  const value = form.elements.payerId.value.trim();
+  if (!payerKey) return;
+  const stored = readStoredPayerIds();
+  if (value) {
+    stored[payerKey] = value;
+  } else {
+    delete stored[payerKey];
+  }
+  writeStoredPayerIds(stored);
+}
+
+function applyStoredPayerId({ clearIfMissing = false } = {}) {
+  const payerKey = getPayerIdentityKey();
+  if (!payerKey) return false;
+  const stored = readStoredPayerIds();
+  const savedValue = stored[payerKey];
+  if (savedValue) {
+    form.elements.payerId.value = savedValue;
+    return true;
+  } else if (clearIfMissing) {
+    form.elements.payerId.value = "";
+  }
+  return false;
+}
+
+function syncPayerReference() {
+  form.elements.payerRef.value = form.elements.orderNo.value;
 }
 
 function toLocalInputValue(date) {
@@ -243,17 +289,28 @@ function syncAmounts(event) {
   if (target.name === "payCurrency") {
     form.elements.receiveCurrency.value = target.value;
   }
+  if (target.name === "orderNo") {
+    syncPayerReference();
+  }
+  if (target.name === "payerName") {
+    applyStoredPayerId({ clearIfMissing: event.type === "change" });
+  }
+  if (target.name === "payerIdLabel") {
+    applyStoredPayerId();
+  }
 }
 
 function resetDemo() {
   setFormValues(defaults);
+  applyStoredPayerId();
+  syncPayerReference();
   updatePreview();
 }
 
 function newOrder() {
   const orderNo = generateOrderNo();
   form.elements.orderNo.value = orderNo;
-  form.elements.payerRef.value = generatePayerReference();
+  syncPayerReference();
   updatePreview();
 }
 
@@ -263,7 +320,7 @@ function randomizePayerId() {
 }
 
 function randomizePayerReference() {
-  form.elements.payerRef.value = generatePayerReference();
+  syncPayerReference();
   updatePreview();
 }
 
@@ -554,6 +611,8 @@ function buildPdf(canvas) {
 }
 
 function exportPng() {
+  saveCurrentPayerId();
+  syncPayerReference();
   const canvas = drawReceiptCanvas();
   canvas.toBlob((blob) => {
     if (blob) downloadBlob(blob, `payout-confirmation-${form.elements.orderNo.value || "export"}.png`);
@@ -561,13 +620,15 @@ function exportPng() {
 }
 
 function exportPdf() {
+  saveCurrentPayerId();
+  syncPayerReference();
   const canvas = drawReceiptCanvas();
   const pdfBlob = buildPdf(canvas);
   downloadBlob(pdfBlob, `payout-confirmation-${form.elements.orderNo.value || "export"}.pdf`);
 }
 
 form.addEventListener("input", (event) => {
-  saveState.textContent = "同步中";
+  saveState.textContent = getReceiptCopy(form.elements.language.value).syncing;
   syncAmounts(event);
   updatePreview();
 });
@@ -577,6 +638,8 @@ form.addEventListener("change", (event) => {
 });
 newOrderBtn.addEventListener("click", newOrder);
 resetDemoBtn.addEventListener("click", resetDemo);
+randomPayerIdBtn.addEventListener("click", randomizePayerId);
+randomPayerRefBtn.addEventListener("click", randomizePayerReference);
 exportPngBtn.addEventListener("click", exportPng);
 exportPdfBtn.addEventListener("click", exportPdf);
 
