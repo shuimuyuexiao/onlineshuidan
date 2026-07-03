@@ -1,5 +1,5 @@
 const form = document.querySelector("#receiptForm");
-const preview = document.querySelector("#receiptPreview");
+const preview = document.querySelector(".preview-column");
 const saveState = document.querySelector("#saveState");
 const newOrderBtn = document.querySelector("#newOrderBtn");
 const resetDemoBtn = document.querySelector("#resetDemoBtn");
@@ -8,9 +8,18 @@ const exportPdfBtn = document.querySelector("#exportPdfBtn");
 const randomPayerIdBtn = document.querySelector("#randomPayerIdBtn");
 const randomPayerRefBtn = document.querySelector("#randomPayerRefBtn");
 const payerIdStorageKey = "payoutGenerator.payerIdsByPayerName";
+const payerCompanies = {
+  "LOCAL OPTION TECH LIMITED": "RM 1312 TELFORD HSE 16 WANG HOI RD KLN BAY HONG KONG",
+  "NO FIVE CONSOLIDATE IMPORT & EXPORT CO., LIMITED": "NO.16 6/F TOWER B NEW MANDARIN PLAZA NO.14 SCIENCE MUSEUM RD TSIM SHA TSUI HONG KONG",
+  "MONOLITH TECHNOLOGY LIMITED": "RM 1312 TELFORD HSE 16 WANG HOI RD KLN BAY HONG KONG",
+  "STARPORT TRADING LIMITED": "UNIT 01 13F THE GOLDSILVER COMM BLDG NOS.12-18 MERCER ST SHEUNG WAN HK",
+  "CLICKBRIDGE TECHNOLOGY LIMITED": "UNIT 01 13F THE GOLDSILVER COMM BLDG NOS.12-18 MERCER ST SHEUNG WAN HK",
+  "MAYGOGH TRADING CO., LIMITED": "UNIT 01 13F THE GOLDSILVER COMM BLDG NOS.12-18 MERCER ST SHEUNG WAN HK"
+};
 
 const defaults = {
   language: "zh",
+  receiptStyle: "table",
   status: "处理中",
   orderNo: "42236070214310308064",
   startedAt: "2026-07-02T14:45:22",
@@ -21,21 +30,33 @@ const defaults = {
   paymentMethod: "SWIFT",
   fee: "25.00",
   feeCurrency: "USD",
+  exchangeRate: "1",
+  paymentPurpose: "供应商付款",
   memo: "Invoice payment / Contract settlement",
-  payerName: "FANG YU KUO",
+  payerName: "LOCAL OPTION TECH LIMITED",
+  payerAddress: "RM 1312 TELFORD HSE 16 WANG HOI RD KLN BAY HONG KONG",
   payerIdLabel: "公司ID",
   payerId: "004937100053",
   payerRef: "42236070214310308064",
   payerVerify: "",
-  recipientName: "FANG YU KUO",
+  recipientName: "HONG KONG HEJIS EXPRESS CO.,LIMITED",
+  recipientCountry: "中国香港特别行政区",
+  recipientBank: "HONG KONG HEJIS EXPRESS CO.,LIMITED",
   recipientAccountLabel: "账户号码",
-  recipientAccount: "203610811888",
+  recipientAccount: "147850366838",
+  recipientSwift: "HSBCHKHHHKH",
   recipientType: "Individual",
   recipientVerify: "",
   receiveAmount: "150000.00"
 };
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const fixedValueTranslations = {
+  en: {
+    "供应商付款": "Supplier Payment",
+    "中国香港特别行政区": "Hong Kong SAR, China"
+  }
+};
 const receiptCopy = {
   zh: {
     statusLabel: "交易状态:",
@@ -52,6 +73,24 @@ const receiptCopy = {
     paymentReference: "付款参考号:",
     recipientType: "收款方类型:",
     paymentSummary: "支付摘要",
+    voucherTitle: "付款凭证",
+    paymentDetails: "付款明细",
+    serialNo: "交易流水号",
+    issuedAt: "签发日期",
+    timezone: "时区",
+    paymentAmount: "付款金额",
+    exchangeRate: "汇率",
+    clearingNetwork: "清算网络",
+    paymentPurpose: "付款用途",
+    transactionTime: "交易时间",
+    completedTime: "完成时间",
+    remittanceMemo: "汇款附言",
+    name: "名称",
+    country: "国家",
+    bank: "银行",
+    bankAccount: "银行账号",
+    payerName: "付款人名称",
+    businessAddress: "经营地址",
     payCurrency: "支付币种",
     payAmount: "支付金额",
     receiveCurrency: "收款币种",
@@ -59,6 +98,7 @@ const receiptCopy = {
     totalLabel: "总计:",
     synced: "已同步",
     syncing: "同步中",
+    timezoneValue: "中国香港",
     statuses: {
       处理中: "处理中",
       已完成: "已完成",
@@ -92,6 +132,24 @@ const receiptCopy = {
     paymentReference: "Payment Reference No:",
     recipientType: "Recipient Type:",
     paymentSummary: "Payment Summary",
+    voucherTitle: "Payment Voucher",
+    paymentDetails: "Payment Details",
+    serialNo: "Transaction Reference",
+    issuedAt: "Issue Date",
+    timezone: "Time Zone",
+    paymentAmount: "Payment Amount",
+    exchangeRate: "Exchange Rate",
+    clearingNetwork: "Clearing Network",
+    paymentPurpose: "Payment Purpose",
+    transactionTime: "Transaction Time",
+    completedTime: "Completion Time",
+    remittanceMemo: "Remittance Memo",
+    name: "Name",
+    country: "Country",
+    bank: "Bank",
+    bankAccount: "Bank Account",
+    payerName: "Payer Name",
+    businessAddress: "Business Address",
     payCurrency: "Payment Currency",
     payAmount: "Payment Amount",
     receiveCurrency: "Receiving Currency",
@@ -99,6 +157,7 @@ const receiptCopy = {
     totalLabel: "Total:",
     synced: "Synced",
     syncing: "Syncing",
+    timezoneValue: "Hong Kong, China",
     statuses: {
       处理中: "Processing",
       已完成: "Completed",
@@ -125,6 +184,10 @@ function pad(value) {
 
 function getReceiptCopy(language) {
   return receiptCopy[language] || receiptCopy.zh;
+}
+
+function translateFixedValue(value, language) {
+  return fixedValueTranslations[language]?.[value] || value;
 }
 
 function randomNumber(max) {
@@ -220,6 +283,18 @@ function formatDate(value) {
   return `${date.getDate()}-${monthNames[date.getMonth()]}-${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())} (CST)`;
 }
 
+function formatDateTimeCompact(value) {
+  const date = parseDateInput(value);
+  if (!date) return "";
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
+function formatDateOnly(value) {
+  const date = parseDateInput(value);
+  if (!date) return "";
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
 function formatMoney(value) {
   const amount = Number(value);
   if (!Number.isFinite(amount)) return "0.00";
@@ -249,13 +324,21 @@ function buildDisplayData(data) {
     ...data,
     language,
     status: t.statuses[data.status] || data.status,
+    paymentPurpose: translateFixedValue(data.paymentPurpose, language),
+    recipientCountry: translateFixedValue(data.recipientCountry, language),
     startedAtDisplay: formatDate(data.startedAt),
     completedAtDisplay: formatDate(data.completedAt),
+    startedAtVoucher: formatDateTimeCompact(data.startedAt),
+    completedAtVoucher: formatDateTimeCompact(data.completedAt),
+    issueDateDisplay: formatDateOnly(data.completedAt || data.startedAt),
+    timezoneDisplay: t.timezoneValue,
     amountDisplay: amount,
     receiveAmountDisplay: receiveAmount,
     feeDisplay: `${formatMoney(data.fee)} ${data.feeCurrency}`,
     amountWithCurrency: `${amount} ${data.payCurrency}`,
+    paymentAmountWithCurrency: `${amount} ${data.payCurrency}`,
     receiveAmountWithCurrency: `${receiveAmount} ${data.receiveCurrency}`,
+    recipientBankDisplay: data.recipientBank || data.recipientName,
     payerIdLabelDisplay: `${t.payerLabels[data.payerIdLabel] || data.payerIdLabel}:`,
     recipientAccountLabelDisplay: `${t.recipientLabels[data.recipientAccountLabel] || data.recipientAccountLabel}:`
   };
@@ -269,10 +352,32 @@ function applyReceiptLanguage(language) {
   });
 }
 
+function applyReceiptStyle(style) {
+  preview.querySelectorAll("[data-style-panel]").forEach((panel) => {
+    panel.classList.toggle("is-hidden", panel.dataset.stylePanel !== style);
+  });
+}
+
+function applyFormStyle(style) {
+  form.querySelectorAll("[data-form-style]").forEach((node) => {
+    const styles = node.dataset.formStyle.split(/\s+/);
+    node.classList.toggle("is-hidden", !styles.includes(style));
+  });
+}
+
+function syncPayerAddress() {
+  const address = payerCompanies[form.elements.payerName.value];
+  if (address) {
+    form.elements.payerAddress.value = address;
+  }
+}
+
 function updatePreview() {
   const data = getData();
   const display = buildDisplayData(data);
   applyReceiptLanguage(display.language);
+  applyReceiptStyle(display.receiptStyle || "table");
+  applyFormStyle(display.receiptStyle || "table");
   preview.querySelectorAll("[data-preview]").forEach((node) => {
     const key = node.dataset.preview;
     node.textContent = display[key] || "";
@@ -293,6 +398,7 @@ function syncAmounts(event) {
     syncPayerReference();
   }
   if (target.name === "payerName") {
+    syncPayerAddress();
     applyStoredPayerId({ clearIfMissing: event.type === "change" });
   }
   if (target.name === "payerIdLabel") {
@@ -302,6 +408,7 @@ function syncAmounts(event) {
 
 function resetDemo() {
   setFormValues(defaults);
+  syncPayerAddress();
   applyStoredPayerId();
   syncPayerReference();
   updatePreview();
@@ -390,6 +497,9 @@ function drawCell(ctx, x, y, width, height, text, options = {}) {
 
 function drawReceiptCanvas() {
   const data = buildDisplayData(getData());
+  if (data.receiptStyle === "voucher") {
+    return drawVoucherCanvas(data);
+  }
   const t = getReceiptCopy(data.language);
   const canvas = document.createElement("canvas");
   const scale = 2;
@@ -528,6 +638,118 @@ function drawReceiptCanvas() {
         size: rowIndex === 0 ? 22 : 24
       });
     });
+  });
+
+  return canvas;
+}
+
+function drawVoucherCanvas(data) {
+  const t = getReceiptCopy(data.language);
+  const canvas = document.createElement("canvas");
+  const scale = 2;
+  const width = 1200;
+  const height = 1700;
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(scale, scale);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
+
+  const margin = 140;
+  const right = width - margin;
+  const colGap = 190;
+  const colW = (right - margin - colGap) / 2;
+
+  function text(value, x, y, options = {}) {
+    const {
+      size = 22,
+      weight = 400,
+      color = "#111111",
+      align = "left",
+      family = 'Georgia, "Times New Roman", "PingFang SC", serif',
+      maxWidth
+    } = options;
+    ctx.fillStyle = color;
+    ctx.font = `${weight} ${size}px ${family}`;
+    ctx.textAlign = align;
+    ctx.textBaseline = "top";
+    ctx.fillText(String(value || ""), x, y, maxWidth);
+  }
+
+  function labelValue(label, value, x, y, maxWidth = colW) {
+    text(label, x, y, { size: 20, color: "#777777", maxWidth });
+    text(value, x, y + 30, { size: 21, weight: 700, maxWidth });
+  }
+
+  function labelValueWrapped(label, value, x, y, maxWidth = colW) {
+    text(label, x, y, { size: 20, color: "#777777", maxWidth });
+    ctx.fillStyle = "#111111";
+    ctx.font = '700 21px Georgia, "Times New Roman", "PingFang SC", serif';
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    wrapText(ctx, value, x, y + 30, maxWidth, 30, 3);
+  }
+
+  const metaY = 58;
+  const metaW = 150;
+  labelValue(t.serialNo, data.orderNo, right - metaW * 3 - 36, metaY, metaW + 20);
+  labelValue(t.issuedAt, data.issueDateDisplay, right - metaW * 2 + 4, metaY, metaW);
+  labelValue(t.timezone, data.timezoneDisplay, right - metaW + 40, metaY, metaW);
+
+  ctx.strokeStyle = "#e7e7e7";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(margin, 150);
+  ctx.lineTo(right, 150);
+  ctx.stroke();
+
+  text(t.voucherTitle, margin, 205, { size: 34, weight: 700 });
+
+  let y = 330;
+  text(t.paymentDetails, margin, y, { size: 28, weight: 700 });
+  y += 70;
+  labelValue(t.paymentAmount, data.paymentAmountWithCurrency, margin, y);
+  labelValue(t.fee, data.feeDisplay, margin + colW + colGap, y);
+  y += 80;
+  labelValue(t.receiveAmount, data.receiveAmountWithCurrency, margin, y);
+  labelValue(t.exchangeRate, data.exchangeRate, margin + colW + colGap, y);
+  y += 80;
+  labelValue(t.clearingNetwork, data.paymentMethod, margin, y);
+  labelValue(t.paymentPurpose, data.paymentPurpose, margin + colW + colGap, y);
+  y += 80;
+  labelValue(t.transactionTime, data.startedAtVoucher, margin, y);
+  labelValue(t.completedTime, data.completedAtVoucher, margin + colW + colGap, y);
+  y += 80;
+  labelValueWrapped(t.remittanceMemo, data.memo, margin, y, right - margin);
+
+  y += 140;
+  text(t.recipient, margin, y, { size: 28, weight: 700 });
+  y += 70;
+  labelValueWrapped(t.name, data.recipientName, margin, y);
+  labelValueWrapped(t.country, data.recipientCountry, margin + colW + colGap, y);
+  y += 90;
+  labelValueWrapped(t.bank, data.recipientBankDisplay, margin, y);
+  labelValue(t.bankAccount, data.recipientAccount, margin + colW + colGap, y);
+  y += 90;
+  labelValue("SWIFT CODE", data.recipientSwift, margin, y);
+
+  y += 130;
+  text(t.payer, margin, y, { size: 28, weight: 700 });
+  y += 70;
+  labelValueWrapped(t.payerName, data.payerName, margin, y, right - margin);
+  y += 90;
+  labelValueWrapped(t.businessAddress, data.payerAddress, margin, y, right - margin);
+
+  ctx.fillStyle = "#f4f5f8";
+  ctx.fillRect(0, height - 120, width, 120);
+  text("Photon Dance (Hong Kong) Limited", margin, height - 92, { size: 17, color: "#333333" });
+  text(data.language === "en" ? "Page 1 of 1" : "第 1 页，共 1 页", right, height - 92, {
+    size: 17,
+    color: "#333333",
+    align: "right"
   });
 
   return canvas;

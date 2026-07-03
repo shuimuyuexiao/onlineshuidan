@@ -162,7 +162,8 @@ label > span {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   min-height: 40px;
   border: 1px solid var(--line);
@@ -174,9 +175,15 @@ select {
 }
 
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(20, 79, 61, 0.12);
+}
+
+textarea {
+  min-height: 78px;
+  resize: vertical;
 }
 
 .field-grid {
@@ -220,6 +227,10 @@ select:focus {
   color: #080f18;
   background: #fff;
   border: 1px solid #e0e4ea;
+}
+
+.is-hidden {
+  display: none !important;
 }
 
 .receipt > * {
@@ -364,6 +375,81 @@ select:focus {
   background: #fbfcfd;
 }
 
+.voucher-receipt {
+  width: min(900px, 100%);
+  min-height: 1160px;
+  margin: 0 auto;
+  padding: 36px 78px 42px;
+  color: #121212;
+  background: #fff;
+  border: 1px solid #e0e4ea;
+  font-family: Georgia, "Times New Roman", "PingFang SC", serif;
+}
+
+.voucher-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e7e7e7;
+}
+
+.voucher-meta {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 0.8fr;
+  gap: 24px;
+  min-width: 390px;
+  text-align: right;
+  margin-left: auto;
+}
+
+.voucher-meta span,
+.voucher-grid span {
+  display: block;
+  color: #777;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.voucher-meta strong,
+.voucher-grid strong {
+  display: block;
+  margin-top: 4px;
+  color: #111;
+  font-size: 15px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.voucher-section {
+  margin-top: 44px;
+}
+
+.voucher-section h2 {
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: 0;
+}
+
+.voucher-section h3 {
+  margin: 0 0 18px;
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+.voucher-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 130px;
+  row-gap: 18px;
+}
+
+.voucher-grid .wide {
+  grid-column: 1 / -1;
+}
+
 @media (max-width: 1120px) {
   .toolbar,
   .workspace {
@@ -411,6 +497,26 @@ select:focus {
 
   .receipt {
     min-width: 620px;
+  }
+
+  .voucher-receipt {
+    min-width: 620px;
+    padding: 28px 36px 34px;
+  }
+
+  .voucher-top,
+  .voucher-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .voucher-top {
+    display: grid;
+  }
+
+  .voucher-meta {
+    grid-template-columns: 1fr;
+    min-width: 0;
+    text-align: left;
   }
 }
 
