@@ -17,37 +17,80 @@ const payerCompanies = {
   "MAYGOGH TRADING CO., LIMITED": "UNIT 01 13F THE GOLDSILVER COMM BLDG NOS.12-18 MERCER ST SHEUNG WAN HK"
 };
 
+const styleDefaults = {
+  table: {
+    status: "处理中",
+    orderNo: "42236070214310308064",
+    startedAt: "2026-07-02T14:45:22",
+    completedAt: "2026-07-02T15:31:13",
+    amount: "150000.00",
+    payCurrency: "USD",
+    receiveCurrency: "USD",
+    paymentMethod: "SWIFT",
+    fee: "25.00",
+    feeCurrency: "USD",
+    exchangeRate: "1",
+    paymentPurpose: "",
+    memo: "Invoice payment / Contract settlement",
+    payerNameTable: "FANG YU KUO",
+    payerNameVoucher: "LOCAL OPTION TECH LIMITED",
+    payerAddress: "",
+    payerIdLabel: "公司ID",
+    payerId: "004937100053",
+    payerRef: "42236070214310308064",
+    payerVerify: "",
+    recipientName: "FANG YU KUO",
+    recipientCountry: "",
+    recipientBank: "",
+    recipientAccountLabel: "账户号码",
+    recipientAccount: "203610811888",
+    recipientSwift: "",
+    recipientType: "Individual",
+    recipientVerify: "",
+    receiveAmount: "150000.00"
+  },
+  voucher: {
+    status: "已完成",
+    orderNo: "pay2072875627492442112",
+    startedAt: "2026-07-03T10:50:53",
+    completedAt: "2026-07-03T10:52:13",
+    amount: "33067.53",
+    payCurrency: "HKD",
+    receiveCurrency: "HKD",
+    paymentMethod: "FPS",
+    fee: "23.53",
+    feeCurrency: "HKD",
+    exchangeRate: "1",
+    paymentPurpose: "供应商付款",
+    memo: "",
+    payerNameTable: "FANG YU KUO",
+    payerNameVoucher: "LOCAL OPTION TECH LIMITED",
+    payerAddress: "RM 1312 TELFORD HSE 16 WANG HOI RD KLN BAY HONG KONG",
+    payerIdLabel: "公司ID",
+    payerId: "004937100053",
+    payerRef: "pay2072875627492442112",
+    payerVerify: "",
+    recipientName: "HONG KONG HEJIS EXPRESS CO.,LIMITED",
+    recipientCountry: "中国香港特别行政区",
+    recipientBank: "HONG KONG HEJIS EXPRESS CO.,LIMITED",
+    recipientAccountLabel: "账户号码",
+    recipientAccount: "147850366838",
+    recipientSwift: "HSBCHKHHHKH",
+    recipientType: "Company",
+    recipientVerify: "",
+    receiveAmount: "33044"
+  }
+};
 const defaults = {
   language: "zh",
   receiptStyle: "table",
-  status: "处理中",
-  orderNo: "42236070214310308064",
-  startedAt: "2026-07-02T14:45:22",
-  completedAt: "2026-07-02T15:31:13",
-  amount: "150000.00",
-  payCurrency: "USD",
-  receiveCurrency: "USD",
-  paymentMethod: "SWIFT",
-  fee: "25.00",
-  feeCurrency: "USD",
-  exchangeRate: "1",
-  paymentPurpose: "供应商付款",
-  memo: "Invoice payment / Contract settlement",
-  payerName: "LOCAL OPTION TECH LIMITED",
-  payerAddress: "RM 1312 TELFORD HSE 16 WANG HOI RD KLN BAY HONG KONG",
-  payerIdLabel: "公司ID",
-  payerId: "004937100053",
-  payerRef: "42236070214310308064",
-  payerVerify: "",
-  recipientName: "HONG KONG HEJIS EXPRESS CO.,LIMITED",
-  recipientCountry: "中国香港特别行政区",
-  recipientBank: "HONG KONG HEJIS EXPRESS CO.,LIMITED",
-  recipientAccountLabel: "账户号码",
-  recipientAccount: "147850366838",
-  recipientSwift: "HSBCHKHHHKH",
-  recipientType: "Individual",
-  recipientVerify: "",
-  receiveAmount: "150000.00"
+  ...styleDefaults.table
+};
+let activeStyle = defaults.receiptStyle;
+let isLoadingStyle = false;
+const styleData = {
+  table: { ...styleDefaults.table },
+  voucher: { ...styleDefaults.voucher }
 };
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -233,10 +276,11 @@ function writeStoredPayerIds(values) {
 }
 
 function getPayerIdentityKey() {
-  return form.elements.payerName.value.trim().toUpperCase();
+  return getActivePayerNameValue().trim().toUpperCase();
 }
 
 function saveCurrentPayerId() {
+  if (activeStyle !== "table") return;
   const payerKey = getPayerIdentityKey();
   const value = form.elements.payerId.value.trim();
   if (!payerKey) return;
@@ -305,7 +349,10 @@ function formatMoney(value) {
 }
 
 function getData() {
-  return Object.fromEntries(new FormData(form).entries());
+  const data = Object.fromEntries(new FormData(form).entries());
+  const style = data.receiptStyle || activeStyle || "table";
+  data.payerName = style === "voucher" ? data.payerNameVoucher : data.payerNameTable;
+  return data;
 }
 
 function setFormValues(values) {
@@ -313,6 +360,37 @@ function setFormValues(values) {
     const field = form.elements[key];
     if (field) field.value = value;
   });
+}
+
+function getStyleValues() {
+  const data = Object.fromEntries(new FormData(form).entries());
+  delete data.language;
+  delete data.receiptStyle;
+  return data;
+}
+
+function getActivePayerNameValue() {
+  return activeStyle === "voucher" ? form.elements.payerNameVoucher.value : form.elements.payerNameTable.value;
+}
+
+function saveActiveStyleData() {
+  if (isLoadingStyle) return;
+  styleData[activeStyle] = {
+    ...styleData[activeStyle],
+    ...getStyleValues()
+  };
+}
+
+function loadStyleData(style) {
+  isLoadingStyle = true;
+  setFormValues({
+    ...styleData[style],
+    receiptStyle: style,
+    language: form.elements.language.value || defaults.language
+  });
+  activeStyle = style;
+  syncPayerReference();
+  isLoadingStyle = false;
 }
 
 function buildDisplayData(data) {
@@ -366,7 +444,7 @@ function applyFormStyle(style) {
 }
 
 function syncPayerAddress() {
-  const address = payerCompanies[form.elements.payerName.value];
+  const address = payerCompanies[form.elements.payerNameVoucher.value];
   if (address) {
     form.elements.payerAddress.value = address;
   }
@@ -397,8 +475,11 @@ function syncAmounts(event) {
   if (target.name === "orderNo") {
     syncPayerReference();
   }
-  if (target.name === "payerName") {
+  if (target.name === "payerNameVoucher") {
     syncPayerAddress();
+    applyStoredPayerId({ clearIfMissing: event.type === "change" });
+  }
+  if (target.name === "payerNameTable") {
     applyStoredPayerId({ clearIfMissing: event.type === "change" });
   }
   if (target.name === "payerIdLabel") {
@@ -407,10 +488,9 @@ function syncAmounts(event) {
 }
 
 function resetDemo() {
-  setFormValues(defaults);
-  syncPayerAddress();
+  styleData[activeStyle] = { ...styleDefaults[activeStyle] };
+  loadStyleData(activeStyle);
   applyStoredPayerId();
-  syncPayerReference();
   updatePreview();
 }
 
@@ -418,16 +498,19 @@ function newOrder() {
   const orderNo = generateOrderNo();
   form.elements.orderNo.value = orderNo;
   syncPayerReference();
+  saveActiveStyleData();
   updatePreview();
 }
 
 function randomizePayerId() {
   form.elements.payerId.value = generatePayerId(form.elements.payerIdLabel.value);
+  saveActiveStyleData();
   updatePreview();
 }
 
 function randomizePayerReference() {
   syncPayerReference();
+  saveActiveStyleData();
   updatePreview();
 }
 
@@ -662,6 +745,7 @@ function drawVoucherCanvas(data) {
   const right = width - margin;
   const colGap = 190;
   const colW = (right - margin - colGap) / 2;
+  const bankFont = 'Arial, Helvetica, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif';
 
   function text(value, x, y, options = {}) {
     const {
@@ -669,7 +753,7 @@ function drawVoucherCanvas(data) {
       weight = 400,
       color = "#111111",
       align = "left",
-      family = 'Georgia, "Times New Roman", "PingFang SC", serif',
+      family = bankFont,
       maxWidth
     } = options;
     ctx.fillStyle = color;
@@ -687,7 +771,7 @@ function drawVoucherCanvas(data) {
   function labelValueWrapped(label, value, x, y, maxWidth = colW) {
     text(label, x, y, { size: 20, color: "#777777", maxWidth });
     ctx.fillStyle = "#111111";
-    ctx.font = '700 21px Georgia, "Times New Roman", "PingFang SC", serif';
+    ctx.font = `700 21px ${bankFont}`;
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
     wrapText(ctx, value, x, y + 30, maxWidth, 30, 3);
@@ -833,8 +917,9 @@ function buildPdf(canvas) {
 }
 
 function exportPng() {
-  saveCurrentPayerId();
   syncPayerReference();
+  saveActiveStyleData();
+  saveCurrentPayerId();
   const canvas = drawReceiptCanvas();
   canvas.toBlob((blob) => {
     if (blob) downloadBlob(blob, `payout-confirmation-${form.elements.orderNo.value || "export"}.png`);
@@ -842,22 +927,29 @@ function exportPng() {
 }
 
 function exportPdf() {
-  saveCurrentPayerId();
   syncPayerReference();
+  saveActiveStyleData();
+  saveCurrentPayerId();
   const canvas = drawReceiptCanvas();
   const pdfBlob = buildPdf(canvas);
   downloadBlob(pdfBlob, `payout-confirmation-${form.elements.orderNo.value || "export"}.pdf`);
 }
 
-form.addEventListener("input", (event) => {
+function handleFormUpdate(event) {
+  if (event.target?.name === "receiptStyle") {
+    saveActiveStyleData();
+    loadStyleData(event.target.value);
+    updatePreview();
+    return;
+  }
   saveState.textContent = getReceiptCopy(form.elements.language.value).syncing;
   syncAmounts(event);
+  saveActiveStyleData();
   updatePreview();
-});
-form.addEventListener("change", (event) => {
-  syncAmounts(event);
-  updatePreview();
-});
+}
+
+form.addEventListener("input", handleFormUpdate);
+form.addEventListener("change", handleFormUpdate);
 newOrderBtn.addEventListener("click", newOrder);
 resetDemoBtn.addEventListener("click", resetDemo);
 randomPayerIdBtn.addEventListener("click", randomizePayerId);

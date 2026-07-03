@@ -135,9 +135,13 @@
             <div class="section-title">
               <h2>付款方</h2>
             </div>
-            <label>
+            <label data-form-style="table">
               <span>付款方名称</span>
-              <select name="payerName">
+              <input name="payerNameTable" maxlength="80" />
+            </label>
+            <label data-form-style="voucher">
+              <span>付款公司</span>
+              <select name="payerNameVoucher">
                 <option>LOCAL OPTION TECH LIMITED</option>
                 <option>NO FIVE CONSOLIDATE IMPORT & EXPORT CO., LIMITED</option>
                 <option>MONOLITH TECHNOLOGY LIMITED</option>
