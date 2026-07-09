@@ -348,6 +348,27 @@ function formatMoney(value) {
   });
 }
 
+function moneyToCents(value) {
+  const amount = Number.parseFloat(value);
+  if (!Number.isFinite(amount)) return 0;
+  return Math.round(amount * 100);
+}
+
+function centsToInputValue(cents) {
+  return (cents / 100).toFixed(2);
+}
+
+function syncVoucherPaymentAmount() {
+  if (activeStyle !== "voucher") return;
+  const receiveCents = moneyToCents(form.elements.receiveAmount.value);
+  const feeCents = moneyToCents(form.elements.fee.value);
+  form.elements.amount.value = centsToInputValue(receiveCents + feeCents);
+}
+
+function applyAmountMode(style) {
+  form.elements.amount.readOnly = style === "voucher";
+}
+
 function getData() {
   const data = Object.fromEntries(new FormData(form).entries());
   const style = data.receiptStyle || activeStyle || "table";
@@ -375,6 +396,7 @@ function getActivePayerNameValue() {
 
 function saveActiveStyleData() {
   if (isLoadingStyle) return;
+  syncVoucherPaymentAmount();
   styleData[activeStyle] = {
     ...styleData[activeStyle],
     ...getStyleValues()
@@ -390,6 +412,8 @@ function loadStyleData(style) {
   });
   activeStyle = style;
   syncPayerReference();
+  syncVoucherPaymentAmount();
+  applyAmountMode(style);
   isLoadingStyle = false;
 }
 
@@ -441,6 +465,7 @@ function applyFormStyle(style) {
     const styles = node.dataset.formStyle.split(/\s+/);
     node.classList.toggle("is-hidden", !styles.includes(style));
   });
+  applyAmountMode(style);
 }
 
 function syncPayerAddress() {
@@ -466,7 +491,9 @@ function updatePreview() {
 function syncAmounts(event) {
   const target = event?.target;
   if (!target) return;
-  if (target.name === "amount") {
+  if (activeStyle === "voucher" && ["amount", "receiveAmount", "fee"].includes(target.name)) {
+    syncVoucherPaymentAmount();
+  } else if (target.name === "amount") {
     form.elements.receiveAmount.value = target.value;
   }
   if (target.name === "payCurrency") {
@@ -918,6 +945,7 @@ function buildPdf(canvas) {
 
 function exportPng() {
   syncPayerReference();
+  syncVoucherPaymentAmount();
   saveActiveStyleData();
   saveCurrentPayerId();
   const canvas = drawReceiptCanvas();
@@ -928,6 +956,7 @@ function exportPng() {
 
 function exportPdf() {
   syncPayerReference();
+  syncVoucherPaymentAmount();
   saveActiveStyleData();
   saveCurrentPayerId();
   const canvas = drawReceiptCanvas();
