@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>出款凭证生成器</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=20260710b" />
   </head>
   <body>
     <main class="app-shell">
@@ -115,16 +115,6 @@
                 </select>
               </label>
             </div>
-            <div class="field-grid two" data-form-style="voucher">
-              <label>
-                <span>汇率</span>
-                <input name="exchangeRate" type="number" min="0" step="0.0001" />
-              </label>
-              <label>
-                <span>付款用途</span>
-                <input name="paymentPurpose" maxlength="80" />
-              </label>
-            </div>
             <label>
               <span>交易附言</span>
               <input name="memo" maxlength="120" placeholder="例如 Invoice 20260702 / Contract payment" />
@@ -192,16 +182,10 @@
               <span>收款方名称</span>
               <input name="recipientName" maxlength="80" />
             </label>
-            <div class="field-grid two" data-form-style="voucher">
-              <label>
-                <span>收款国家/地区</span>
-                <input name="recipientCountry" maxlength="80" />
-              </label>
-              <label>
-                <span>SWIFT CODE</span>
-                <input name="recipientSwift" maxlength="40" />
-              </label>
-            </div>
+            <label data-form-style="voucher">
+              <span>SWIFT CODE</span>
+              <input name="recipientSwift" maxlength="40" />
+            </label>
             <label data-form-style="voucher">
               <span>收款银行</span>
               <input name="recipientBank" maxlength="100" />
@@ -374,18 +358,6 @@
                   <strong data-preview="receiveAmountWithCurrency"></strong>
                 </div>
                 <div>
-                  <span data-i18n="exchangeRate">汇率</span>
-                  <strong data-preview="exchangeRate"></strong>
-                </div>
-                <div>
-                  <span data-i18n="clearingNetwork">清算网络</span>
-                  <strong data-preview="paymentMethod"></strong>
-                </div>
-                <div>
-                  <span data-i18n="paymentPurpose">付款用途</span>
-                  <strong data-preview="paymentPurpose"></strong>
-                </div>
-                <div>
                   <span data-i18n="transactionTime">交易时间</span>
                   <strong data-preview="startedAtVoucher"></strong>
                 </div>
@@ -393,7 +365,7 @@
                   <span data-i18n="completedTime">完成时间</span>
                   <strong data-preview="completedAtVoucher"></strong>
                 </div>
-                <div class="wide">
+                <div>
                   <span data-i18n="remittanceMemo">汇款附言</span>
                   <strong data-preview="memo"></strong>
                 </div>
@@ -406,10 +378,6 @@
                 <div>
                   <span data-i18n="name">名称</span>
                   <strong data-preview="recipientName"></strong>
-                </div>
-                <div>
-                  <span data-i18n="country">国家</span>
-                  <strong data-preview="recipientCountry"></strong>
                 </div>
                 <div>
                   <span data-i18n="bank">银行</span>
@@ -444,6 +412,6 @@
       </section>
     </main>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=20260710b"></script>
   </body>
 </html>

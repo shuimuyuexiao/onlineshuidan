@@ -81,10 +81,29 @@ const styleDefaults = {
     receiveAmount: "33044"
   }
 };
+function getInitialReceiptStyle() {
+  try {
+    const style = new URLSearchParams(globalThis.location?.search || "").get("style");
+    return styleDefaults[style] ? style : "table";
+  } catch (error) {
+    return "table";
+  }
+}
+
+function applyCaptureMode() {
+  try {
+    const capture = new URLSearchParams(globalThis.location?.search || "").get("capture");
+    document.body.classList.toggle("capture-preview", capture === "preview");
+  } catch (error) {
+    document.body.classList.remove("capture-preview");
+  }
+}
+
+const initialReceiptStyle = getInitialReceiptStyle();
 const defaults = {
   language: "zh",
-  receiptStyle: "table",
-  ...styleDefaults.table
+  receiptStyle: initialReceiptStyle,
+  ...styleDefaults[initialReceiptStyle]
 };
 let activeStyle = defaults.receiptStyle;
 let isLoadingStyle = false;
@@ -826,26 +845,19 @@ function drawVoucherCanvas(data) {
   labelValue(t.fee, data.feeDisplay, margin + colW + colGap, y);
   y += 80;
   labelValue(t.receiveAmount, data.receiveAmountWithCurrency, margin, y);
-  labelValue(t.exchangeRate, data.exchangeRate, margin + colW + colGap, y);
+  labelValue(t.transactionTime, data.startedAtVoucher, margin + colW + colGap, y);
   y += 80;
-  labelValue(t.clearingNetwork, data.paymentMethod, margin, y);
-  labelValue(t.paymentPurpose, data.paymentPurpose, margin + colW + colGap, y);
-  y += 80;
-  labelValue(t.transactionTime, data.startedAtVoucher, margin, y);
-  labelValue(t.completedTime, data.completedAtVoucher, margin + colW + colGap, y);
-  y += 80;
-  labelValueWrapped(t.remittanceMemo, data.memo, margin, y, right - margin);
+  labelValue(t.completedTime, data.completedAtVoucher, margin, y);
+  labelValueWrapped(t.remittanceMemo, data.memo, margin + colW + colGap, y);
 
   y += 140;
   text(t.recipient, margin, y, { size: 28, weight: 700 });
   y += 70;
   labelValueWrapped(t.name, data.recipientName, margin, y);
-  labelValueWrapped(t.country, data.recipientCountry, margin + colW + colGap, y);
+  labelValueWrapped(t.bank, data.recipientBankDisplay, margin + colW + colGap, y);
   y += 90;
-  labelValueWrapped(t.bank, data.recipientBankDisplay, margin, y);
-  labelValue(t.bankAccount, data.recipientAccount, margin + colW + colGap, y);
-  y += 90;
-  labelValue("SWIFT CODE", data.recipientSwift, margin, y);
+  labelValue(t.bankAccount, data.recipientAccount, margin, y);
+  labelValue("SWIFT CODE", data.recipientSwift, margin + colW + colGap, y);
 
   y += 130;
   text(t.payer, margin, y, { size: 28, weight: 700 });
@@ -986,6 +998,7 @@ randomPayerRefBtn.addEventListener("click", randomizePayerReference);
 exportPngBtn.addEventListener("click", exportPng);
 exportPdfBtn.addEventListener("click", exportPdf);
 
+applyCaptureMode();
 resetDemo();
 
 if (!form.elements.startedAt.value || !form.elements.completedAt.value) {

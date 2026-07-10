@@ -450,6 +450,42 @@ textarea {
   grid-column: 1 / -1;
 }
 
+body.capture-preview {
+  background: #ffffff;
+}
+
+.capture-preview .app-shell {
+  width: 900px;
+  margin: 0;
+  padding: 0;
+}
+
+.capture-preview .toolbar,
+.capture-preview .controls,
+.capture-preview .preview-head {
+  display: none;
+}
+
+.capture-preview .workspace {
+  display: block;
+}
+
+.capture-preview .preview-column {
+  width: 900px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.capture-preview .receipt,
+.capture-preview .voucher-receipt {
+  width: 900px;
+  margin: 0;
+  border: 0;
+  box-shadow: none;
+}
+
 @media (max-width: 1120px) {
   .toolbar,
   .workspace {
