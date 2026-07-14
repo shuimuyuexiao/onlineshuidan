@@ -1,13 +1,26 @@
 const form = document.querySelector("#receiptForm");
-const preview = document.querySelector(".preview-column");
+const previewSurface = document.querySelector("#previewSurface");
 const saveState = document.querySelector("#saveState");
-const newOrderBtn = document.querySelector("#newOrderBtn");
 const resetDemoBtn = document.querySelector("#resetDemoBtn");
+const newIdBtn = document.querySelector("#newIdBtn");
+const timeNowBtn = document.querySelector("#timeNowBtn");
 const exportPngBtn = document.querySelector("#exportPngBtn");
 const exportPdfBtn = document.querySelector("#exportPdfBtn");
+const randomDocumentIdBtn = document.querySelector("#randomDocumentIdBtn");
 const randomPayerIdBtn = document.querySelector("#randomPayerIdBtn");
-const randomPayerRefBtn = document.querySelector("#randomPayerRefBtn");
-const payerIdStorageKey = "payoutGenerator.payerIdsByPayerName";
+const documentIdLabel = document.querySelector("#documentIdLabel");
+const amountLabel = document.querySelector("#amountLabel");
+const purposeLabel = document.querySelector("#purposeLabel");
+const memoLabel = document.querySelector("#memoLabel");
+
+const payerIdStorageKey = "payoutGenerator.payerIdsByPayerName.v2";
+const templateNames = {
+  gc: "1 GC模版",
+  jialian: "2 嘉联模版",
+  uq: "3 UQ模版",
+  py: "4 PY模版"
+};
+
 const payerCompanies = {
   "LOCAL OPTION TECH LIMITED": "RM 1312 TELFORD HSE 16 WANG HOI RD KLN BAY HONG KONG",
   "NO FIVE CONSOLIDATE IMPORT & EXPORT CO., LIMITED": "NO.16 6/F TOWER B NEW MANDARIN PLAZA NO.14 SCIENCE MUSEUM RD TSIM SHA TSUI HONG KONG",
@@ -18,75 +31,194 @@ const payerCompanies = {
 };
 
 const styleDefaults = {
-  table: {
+  gc: {
+    language: "zh",
+    receiptStyle: "gc",
+    documentId: "42446071418192700706",
+    documentDate: "2026-07-14",
+    startedAt: "2026-07-14T18:21:25",
+    completedAt: "2026-07-14T18:50:15",
+    payoutDate: "2026-07-14",
+    completeDate: "2026-07-14",
     status: "处理中",
-    orderNo: "42236070214310308064",
-    startedAt: "2026-07-02T14:45:22",
-    completedAt: "2026-07-02T15:31:13",
-    amount: "150000.00",
+    amount: "50000.00",
     payCurrency: "USD",
     receiveCurrency: "USD",
-    paymentMethod: "SWIFT",
+    receiveAmount: "50000.00",
     fee: "25.00",
     feeCurrency: "USD",
-    exchangeRate: "1",
+    paymentMethod: "SWIFT",
+    exchangeRate: "-",
     paymentPurpose: "",
-    memo: "Invoice payment / Contract settlement",
-    payerNameTable: "FANG YU KUO",
-    payerNameVoucher: "LOCAL OPTION TECH LIMITED",
-    payerAddress: "",
-    payerIdLabel: "公司ID",
-    payerId: "004937100053",
-    payerRef: "42236070214310308064",
-    payerVerify: "",
-    recipientName: "FANG YU KUO",
-    recipientCountry: "",
-    recipientBank: "",
-    recipientAccountLabel: "账户号码",
-    recipientAccount: "203610811888",
-    recipientSwift: "",
-    recipientType: "Individual",
-    recipientVerify: "",
-    receiveAmount: "150000.00"
-  },
-  voucher: {
-    status: "已完成",
-    orderNo: "pay2072875627492442112",
-    startedAt: "2026-07-03T10:50:53",
-    completedAt: "2026-07-03T10:52:13",
-    amount: "33067.53",
-    payCurrency: "HKD",
-    receiveCurrency: "HKD",
-    paymentMethod: "FPS",
-    fee: "23.53",
-    feeCurrency: "HKD",
-    exchangeRate: "1",
-    paymentPurpose: "供应商付款",
     memo: "",
-    payerNameTable: "FANG YU KUO",
-    payerNameVoucher: "LOCAL OPTION TECH LIMITED",
-    payerAddress: "RM 1312 TELFORD HSE 16 WANG HOI RD KLN BAY HONG KONG",
+    payerName: "CHIEN YU HUANG",
+    payerAddress: "",
+    payerEntityType: "COMPANY",
+    payerReference: "",
     payerIdLabel: "公司ID",
     payerId: "004937100053",
-    payerRef: "pay2072875627492442112",
-    payerVerify: "",
-    recipientName: "HONG KONG HEJIS EXPRESS CO.,LIMITED",
-    recipientCountry: "中国香港特别行政区",
-    recipientBank: "HONG KONG HEJIS EXPRESS CO.,LIMITED",
+    payerRef: "42446071418192700706",
+    recipientName: "CHIEN YU HUANG",
+    recipientAddress: "",
+    recipientBank: "",
+    recipientAccount: "049867609833",
+    recipientSwift: "",
+    routingNumber: "",
     recipientAccountLabel: "账户号码",
-    recipientAccount: "147850366838",
-    recipientSwift: "HSBCHKHHHKH",
-    recipientType: "Company",
-    recipientVerify: "",
-    receiveAmount: "33044"
+    recipientType: "Individual"
+  },
+  jialian: {
+    language: "zh",
+    receiptStyle: "jialian",
+    documentId: "62118683074062844928",
+    documentDate: "2026-07-14",
+    startedAt: "2026-07-08T18:36:05",
+    completedAt: "2026-07-08T18:36:05",
+    payoutDate: "2026-07-08",
+    completeDate: "2026-07-14",
+    status: "Success",
+    amount: "4631.00",
+    payCurrency: "USD",
+    receiveCurrency: "USD",
+    receiveAmount: "4624.00",
+    fee: "7.00",
+    feeCurrency: "USD",
+    paymentMethod: "SWIFT",
+    exchangeRate: "-",
+    paymentPurpose: "技术服务费",
+    memo: "",
+    payerName: "MONOLITH TECHNOLOGY LIMITED",
+    payerAddress: "RM 1312 TELFORD HSE 16 WANG HOI RD KLN BAY HONG KONG",
+    payerEntityType: "COMPANY",
+    payerReference: "",
+    payerIdLabel: "公司ID",
+    payerId: "",
+    payerRef: "",
+    recipientName: "NextHub Technologies LLC",
+    recipientAddress: "",
+    recipientBank: "Community Federal Savings Bank",
+    recipientAccount: "8488788344",
+    recipientSwift: "",
+    routingNumber: "026073150",
+    recipientAccountLabel: "银行账号",
+    recipientType: "Company"
+  },
+  uq: {
+    language: "en",
+    receiptStyle: "uq",
+    documentId: "P260714-STEBAFE0",
+    documentDate: "2026-07-14",
+    startedAt: "2026-07-14T11:56:30",
+    completedAt: "",
+    payoutDate: "2026-07-14",
+    completeDate: "",
+    status: "Pending",
+    amount: "100000.00",
+    payCurrency: "USD",
+    receiveCurrency: "USD",
+    receiveAmount: "100000.00",
+    fee: "0.00",
+    feeCurrency: "USD",
+    paymentMethod: "SWIFT",
+    exchangeRate: "-",
+    paymentPurpose: "bill payment",
+    memo: "",
+    payerName: "STARPORT TRADING LIMITED",
+    payerAddress: "UNIT 01 13F THE GOLDSILVER COMM BLDG NOS.12-18 MERCER ST SHEUNG WAN HK",
+    payerEntityType: "COMPANY",
+    payerReference: "STARPORT TRADING LIMITED",
+    payerIdLabel: "公司ID",
+    payerId: "",
+    payerRef: "",
+    recipientName: "3U INTERNATIONAL TRADING (HK) LIMITED",
+    recipientAddress: "FLAT/ROOM 1405B, 14/F, THE BELGIAN BANK BUILDING, NOS. 721-725 NATHAN ROAD, MONGKOK, KOWLOON, HONG KONG HK, HK, 999077, HK",
+    recipientBank: "DBS BANK (HONG KONG) LIMITED",
+    recipientAccount: "79829000687",
+    recipientSwift: "DHBKHKHHXXX",
+    routingNumber: "",
+    recipientAccountLabel: "银行账号",
+    recipientType: "Company"
+  },
+  py: {
+    language: "en",
+    receiptStyle: "py",
+    documentId: "P2607142076598424801553196",
+    documentDate: "2026-07-14",
+    startedAt: "2026-07-14T14:59:03",
+    completedAt: "",
+    payoutDate: "2026-07-14",
+    completeDate: "",
+    status: "Processing",
+    amount: "98980.00",
+    payCurrency: "USD",
+    receiveCurrency: "USD",
+    receiveAmount: "98955.00",
+    fee: "25.00",
+    feeCurrency: "USD",
+    paymentMethod: "SWIFT",
+    exchangeRate: "-",
+    paymentPurpose: "",
+    memo: "-",
+    payerName: "NO FIVE CONSOLIDATE IMPORT & EXPORT CO., LIMITED",
+    payerAddress: "NO.16 6/F TOWER B NEW MANDARIN PLAZA NO.14 SCIENCE MUSEUM RD TSIM SHA TSUI HONG KONG",
+    payerEntityType: "COMPANY",
+    payerReference: "",
+    payerIdLabel: "公司ID",
+    payerId: "",
+    payerRef: "",
+    recipientName: "JAZ HAIR LIMITED",
+    recipientAddress: "",
+    recipientBank: "Standard Chartered Bank (China) Limited Shanghai Branch",
+    recipientAccount: "NRA000000501511471324",
+    recipientSwift: "SCBLCNSXSHA",
+    routingNumber: "",
+    recipientAccountLabel: "银行账号",
+    recipientType: "Company"
   }
 };
-function getInitialReceiptStyle() {
+
+const templateUi = {
+  gc: {
+    idLabel: "订单编号",
+    amountLabel: "金额",
+    purposeLabel: "付款用途",
+    memoLabel: "交易附言"
+  },
+  jialian: {
+    idLabel: "交易编号",
+    amountLabel: "您汇出",
+    purposeLabel: "付款原因",
+    memoLabel: "备注"
+  },
+  uq: {
+    idLabel: "Reference ID",
+    amountLabel: "Amount Paid",
+    purposeLabel: "Payout Reason",
+    memoLabel: "备注"
+  },
+  py: {
+    idLabel: "Transaction ID",
+    amountLabel: "Amount paid",
+    purposeLabel: "付款原因",
+    memoLabel: "Payment note"
+  }
+};
+
+const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+let activeStyle = getInitialStyle();
+let isLoadingStyle = false;
+const styleData = Object.fromEntries(Object.entries(styleDefaults).map(([key, value]) => [key, { ...value }]));
+
+function pad(value) {
+  return String(value).padStart(2, "0");
+}
+
+function getInitialStyle() {
   try {
     const style = new URLSearchParams(globalThis.location?.search || "").get("style");
-    return styleDefaults[style] ? style : "table";
+    return styleDefaults[style] ? style : "gc";
   } catch (error) {
-    return "table";
+    return "gc";
   }
 }
 
@@ -97,159 +229,6 @@ function applyCaptureMode() {
   } catch (error) {
     document.body.classList.remove("capture-preview");
   }
-}
-
-const initialReceiptStyle = getInitialReceiptStyle();
-const defaults = {
-  language: "zh",
-  receiptStyle: initialReceiptStyle,
-  ...styleDefaults[initialReceiptStyle]
-};
-let activeStyle = defaults.receiptStyle;
-let isLoadingStyle = false;
-const styleData = {
-  table: { ...styleDefaults.table },
-  voucher: { ...styleDefaults.voucher }
-};
-
-const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const fixedValueTranslations = {
-  en: {
-    "供应商付款": "Supplier Payment",
-    "中国香港特别行政区": "Hong Kong SAR, China"
-  }
-};
-const receiptCopy = {
-  zh: {
-    statusLabel: "交易状态:",
-    orderNoLabel: "订单编号:",
-    transactionDetails: "交易详情",
-    startedAt: "交易发起日期",
-    completedAt: "交易完成日期",
-    amount: "金额",
-    paymentMethod: "支付方式",
-    fee: "手续费",
-    memo: "交易附言",
-    payer: "付款方",
-    recipient: "收款方",
-    paymentReference: "付款参考号:",
-    recipientType: "收款方类型:",
-    paymentSummary: "支付摘要",
-    voucherTitle: "付款凭证",
-    paymentDetails: "付款明细",
-    serialNo: "交易流水号",
-    issuedAt: "签发日期",
-    timezone: "时区",
-    paymentAmount: "付款金额",
-    exchangeRate: "汇率",
-    clearingNetwork: "清算网络",
-    paymentPurpose: "付款用途",
-    transactionTime: "交易时间",
-    completedTime: "完成时间",
-    remittanceMemo: "汇款附言",
-    name: "名称",
-    country: "国家",
-    bank: "银行",
-    bankAccount: "银行账号",
-    payerName: "付款人名称",
-    businessAddress: "经营地址",
-    payCurrency: "支付币种",
-    payAmount: "支付金额",
-    receiveCurrency: "收款币种",
-    receiveAmount: "收款金额",
-    totalLabel: "总计:",
-    synced: "已同步",
-    syncing: "同步中",
-    timezoneValue: "中国香港",
-    statuses: {
-      处理中: "处理中",
-      已完成: "已完成",
-      待确认: "待确认",
-      已取消: "已取消"
-    },
-    payerLabels: {
-      公司ID: "公司ID",
-      客户编号: "客户编号",
-      账户号码: "账户号码"
-    },
-    recipientLabels: {
-      账户号码: "账户号码",
-      银行账号: "银行账号",
-      钱包号码: "钱包号码",
-      IBAN: "IBAN"
-    }
-  },
-  en: {
-    statusLabel: "Transaction Status:",
-    orderNoLabel: "Order No:",
-    transactionDetails: "Transaction Details",
-    startedAt: "Date Initiated",
-    completedAt: "Date Completed",
-    amount: "Amount",
-    paymentMethod: "Payment Method",
-    fee: "Fee",
-    memo: "Transaction Memo",
-    payer: "Payer",
-    recipient: "Recipient",
-    paymentReference: "Payment Reference No:",
-    recipientType: "Recipient Type:",
-    paymentSummary: "Payment Summary",
-    voucherTitle: "Payment Voucher",
-    paymentDetails: "Payment Details",
-    serialNo: "Transaction Reference",
-    issuedAt: "Issue Date",
-    timezone: "Time Zone",
-    paymentAmount: "Payment Amount",
-    exchangeRate: "Exchange Rate",
-    clearingNetwork: "Clearing Network",
-    paymentPurpose: "Payment Purpose",
-    transactionTime: "Transaction Time",
-    completedTime: "Completion Time",
-    remittanceMemo: "Remittance Memo",
-    name: "Name",
-    country: "Country",
-    bank: "Bank",
-    bankAccount: "Bank Account",
-    payerName: "Payer Name",
-    businessAddress: "Business Address",
-    payCurrency: "Payment Currency",
-    payAmount: "Payment Amount",
-    receiveCurrency: "Receiving Currency",
-    receiveAmount: "Receiving Amount",
-    totalLabel: "Total:",
-    synced: "Synced",
-    syncing: "Syncing",
-    timezoneValue: "Hong Kong, China",
-    statuses: {
-      处理中: "Processing",
-      已完成: "Completed",
-      待确认: "Pending Confirmation",
-      已取消: "Cancelled"
-    },
-    payerLabels: {
-      公司ID: "Company ID",
-      客户编号: "Customer ID",
-      账户号码: "Account No."
-    },
-    recipientLabels: {
-      账户号码: "Account No.",
-      银行账号: "Bank Account No.",
-      钱包号码: "Wallet No.",
-      IBAN: "IBAN"
-    }
-  }
-};
-
-function pad(value) {
-  return String(value).padStart(2, "0");
-}
-
-function getReceiptCopy(language) {
-  return receiptCopy[language] || receiptCopy.zh;
-}
-
-function translateFixedValue(value, language) {
-  return fixedValueTranslations[language]?.[value] || value;
 }
 
 function randomNumber(max) {
@@ -265,11 +244,21 @@ function randomDigits(length) {
   return Array.from({ length }, () => randomNumber(10)).join("");
 }
 
-function generateOrderNo() {
+function randomAlphaNum(length) {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  return Array.from({ length }, () => chars[randomNumber(chars.length)]).join("");
+}
+
+function compactDateStamp(date = new Date()) {
+  return `${String(date.getFullYear()).slice(-2)}${pad(date.getMonth() + 1)}${pad(date.getDate())}`;
+}
+
+function generateDocumentId(style) {
   const now = new Date();
-  const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-  const random = randomDigits(6);
-  return `${stamp}${random}`;
+  if (style === "gc") return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}${randomDigits(6)}`;
+  if (style === "jialian") return randomDigits(20);
+  if (style === "uq") return `P${compactDateStamp(now)}-${randomAlphaNum(8)}`;
+  return `P${compactDateStamp(now)}${randomDigits(19)}`;
 }
 
 function generatePayerId(label) {
@@ -278,60 +267,12 @@ function generatePayerId(label) {
   return randomDigits(12);
 }
 
-function readStoredPayerIds() {
-  try {
-    return JSON.parse(globalThis.localStorage?.getItem(payerIdStorageKey) || "{}");
-  } catch (error) {
-    return {};
-  }
-}
-
-function writeStoredPayerIds(values) {
-  try {
-    globalThis.localStorage?.setItem(payerIdStorageKey, JSON.stringify(values));
-  } catch (error) {
-    // The generator still works if local storage is unavailable.
-  }
-}
-
-function getPayerIdentityKey() {
-  return getActivePayerNameValue().trim().toUpperCase();
-}
-
-function saveCurrentPayerId() {
-  if (activeStyle !== "table") return;
-  const payerKey = getPayerIdentityKey();
-  const value = form.elements.payerId.value.trim();
-  if (!payerKey) return;
-  const stored = readStoredPayerIds();
-  if (value) {
-    stored[payerKey] = value;
-  } else {
-    delete stored[payerKey];
-  }
-  writeStoredPayerIds(stored);
-}
-
-function applyStoredPayerId({ clearIfMissing = false } = {}) {
-  const payerKey = getPayerIdentityKey();
-  if (!payerKey) return false;
-  const stored = readStoredPayerIds();
-  const savedValue = stored[payerKey];
-  if (savedValue) {
-    form.elements.payerId.value = savedValue;
-    return true;
-  } else if (clearIfMissing) {
-    form.elements.payerId.value = "";
-  }
-  return false;
-}
-
-function syncPayerReference() {
-  form.elements.payerRef.value = form.elements.orderNo.value;
-}
-
 function toLocalInputValue(date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
+function toDateInputValue(date) {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 function parseDateInput(value) {
@@ -340,22 +281,28 @@ function parseDateInput(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function formatDate(value) {
+function formatDateGc(value) {
   const date = parseDateInput(value);
   if (!date) return "";
-  return `${date.getDate()}-${monthNames[date.getMonth()]}-${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())} (CST)`;
+  return `${pad(date.getDate())}-${monthNames[date.getMonth()]}-${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())} (CST)`;
 }
 
-function formatDateTimeCompact(value) {
+function formatDateTime(value) {
   const date = parseDateInput(value);
-  if (!date) return "";
+  if (!date) return "--";
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
 
 function formatDateOnly(value) {
   const date = parseDateInput(value);
-  if (!date) return "";
+  if (!date) return "--";
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function formatDotDate(value) {
+  const date = parseDateInput(value);
+  if (!date) return "--";
+  return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())}`;
 }
 
 function formatMoney(value) {
@@ -377,45 +324,142 @@ function centsToInputValue(cents) {
   return (cents / 100).toFixed(2);
 }
 
-function syncVoucherPaymentAmount() {
-  if (activeStyle !== "voucher") return;
-  const receiveCents = moneyToCents(form.elements.receiveAmount.value);
-  const feeCents = moneyToCents(form.elements.fee.value);
-  form.elements.amount.value = centsToInputValue(receiveCents + feeCents);
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-function applyAmountMode(style) {
-  form.elements.amount.readOnly = style === "voucher";
+function displayLanguage(data) {
+  if (data.receiptStyle === "uq" || data.receiptStyle === "py") return "en";
+  return data.language || "zh";
 }
 
-function getData() {
-  const data = Object.fromEntries(new FormData(form).entries());
-  const style = data.receiptStyle || activeStyle || "table";
-  data.payerName = style === "voucher" ? data.payerNameVoucher : data.payerNameTable;
-  return data;
+function titleCaseMethod(value) {
+  if (!value) return "";
+  if (value.toUpperCase() === "SWIFT") return "Swift";
+  return value;
+}
+
+function translateStatus(value, language, style) {
+  if (style === "uq" || style === "py") {
+    const map = { 处理中: "Processing", 已完成: "Success", 待确认: "Pending", 已取消: "Cancelled" };
+    return map[value] || value;
+  }
+  if (language === "en") {
+    const map = { 处理中: "Processing", 已完成: "Completed", 待确认: "Pending Confirmation", 已取消: "Cancelled" };
+    return map[value] || value;
+  }
+  const map = { Success: "付款成功", Pending: "待处理", Processing: "处理中" };
+  return map[value] || value;
+}
+
+function translatePurpose(value, language, style) {
+  if (!value) return "";
+  if (style === "uq" || style === "py") return value;
+  const zhToEn = {
+    技术服务费: "Technical service fees",
+    供应商付款: "Supplier payment",
+    账单付款: "bill payment"
+  };
+  const enToZh = {
+    "Technical service fees": "技术服务费",
+    "bill payment": "账单付款",
+    "Supplier payment": "供应商付款"
+  };
+  return language === "en" ? zhToEn[value] || value : enToZh[value] || value;
+}
+
+function readStoredPayerIds() {
+  try {
+    return JSON.parse(globalThis.localStorage?.getItem(payerIdStorageKey) || "{}");
+  } catch (error) {
+    return {};
+  }
+}
+
+function writeStoredPayerIds(values) {
+  try {
+    globalThis.localStorage?.setItem(payerIdStorageKey, JSON.stringify(values));
+  } catch (error) {
+    // Local storage is optional.
+  }
+}
+
+function saveCurrentPayerId() {
+  if (activeStyle !== "gc") return;
+  const payerKey = form.elements.payerName.value.trim().toUpperCase();
+  const value = form.elements.payerId.value.trim();
+  if (!payerKey) return;
+  const stored = readStoredPayerIds();
+  if (value) stored[payerKey] = value;
+  else delete stored[payerKey];
+  writeStoredPayerIds(stored);
+}
+
+function applyStoredPayerId({ clearIfMissing = false } = {}) {
+  if (activeStyle !== "gc") return;
+  const payerKey = form.elements.payerName.value.trim().toUpperCase();
+  if (!payerKey) return;
+  const stored = readStoredPayerIds();
+  if (stored[payerKey]) {
+    form.elements.payerId.value = stored[payerKey];
+  } else if (clearIfMissing) {
+    form.elements.payerId.value = "";
+  }
+}
+
+function getFormData() {
+  return Object.fromEntries(new FormData(form).entries());
 }
 
 function setFormValues(values) {
   Object.entries(values).forEach(([key, value]) => {
     const field = form.elements[key];
-    if (field) field.value = value;
+    if (field) field.value = value ?? "";
   });
 }
 
 function getStyleValues() {
-  const data = Object.fromEntries(new FormData(form).entries());
-  delete data.language;
-  delete data.receiptStyle;
-  return data;
+  return getFormData();
 }
 
-function getActivePayerNameValue() {
-  return activeStyle === "voucher" ? form.elements.payerNameVoucher.value : form.elements.payerNameTable.value;
+function getData() {
+  const data = getFormData();
+  data.receiptStyle = data.receiptStyle || activeStyle;
+  return normalizeData(data);
+}
+
+function normalizeData(data) {
+  const normalized = { ...data };
+  if (["jialian", "py"].includes(normalized.receiptStyle)) {
+    const paidCents = moneyToCents(normalized.receiveAmount) + moneyToCents(normalized.fee);
+    normalized.amount = centsToInputValue(paidCents);
+  }
+  normalized.language = displayLanguage(normalized);
+  normalized.amountText = `${formatMoney(normalized.amount)} ${normalized.payCurrency}`;
+  normalized.receiveAmountText = `${formatMoney(normalized.receiveAmount)} ${normalized.receiveCurrency}`;
+  normalized.feeText = `${formatMoney(normalized.fee)} ${normalized.feeCurrency}`;
+  normalized.statusText = translateStatus(normalized.status, normalized.language, normalized.receiptStyle);
+  normalized.paymentPurposeText = translatePurpose(normalized.paymentPurpose, normalized.language, normalized.receiptStyle);
+  normalized.startedAtGc = formatDateGc(normalized.startedAt);
+  normalized.completedAtGc = normalized.completedAt ? formatDateGc(normalized.completedAt) : "";
+  normalized.startedAtDisplay = formatDateTime(normalized.startedAt);
+  normalized.completedAtDisplay = normalized.completedAt ? formatDateTime(normalized.completedAt) : "--";
+  normalized.documentDateDisplay = formatDateOnly(normalized.documentDate);
+  normalized.documentDateDot = formatDotDate(normalized.documentDate);
+  normalized.payoutDateDisplay = formatDateOnly(normalized.payoutDate);
+  normalized.completeDateDisplay = normalized.completeDate ? formatDateOnly(normalized.completeDate) : "--";
+  normalized.paymentMethodDisplay = normalized.receiptStyle === "gc" || normalized.receiptStyle === "jialian" ? normalized.paymentMethod : titleCaseMethod(normalized.paymentMethod);
+  return normalized;
 }
 
 function saveActiveStyleData() {
   if (isLoadingStyle) return;
-  syncVoucherPaymentAmount();
+  syncAmounts();
   styleData[activeStyle] = {
     ...styleData[activeStyle],
     ...getStyleValues()
@@ -426,354 +470,386 @@ function loadStyleData(style) {
   isLoadingStyle = true;
   setFormValues({
     ...styleData[style],
-    receiptStyle: style,
-    language: form.elements.language.value || defaults.language
+    receiptStyle: style
   });
   activeStyle = style;
-  syncPayerReference();
-  syncVoucherPaymentAmount();
-  applyAmountMode(style);
+  syncTemplateReferences();
+  syncAmounts();
+  applyFormMode(style);
   isLoadingStyle = false;
 }
 
-function buildDisplayData(data) {
-  const amount = formatMoney(data.amount);
-  const receiveAmount = formatMoney(data.receiveAmount || data.amount);
-  const language = data.language || "zh";
-  const t = getReceiptCopy(language);
-  return {
-    ...data,
-    language,
-    status: t.statuses[data.status] || data.status,
-    paymentPurpose: translateFixedValue(data.paymentPurpose, language),
-    recipientCountry: translateFixedValue(data.recipientCountry, language),
-    startedAtDisplay: formatDate(data.startedAt),
-    completedAtDisplay: formatDate(data.completedAt),
-    startedAtVoucher: formatDateTimeCompact(data.startedAt),
-    completedAtVoucher: formatDateTimeCompact(data.completedAt),
-    issueDateDisplay: formatDateOnly(data.completedAt || data.startedAt),
-    timezoneDisplay: t.timezoneValue,
-    amountDisplay: amount,
-    receiveAmountDisplay: receiveAmount,
-    feeDisplay: `${formatMoney(data.fee)} ${data.feeCurrency}`,
-    amountWithCurrency: `${amount} ${data.payCurrency}`,
-    paymentAmountWithCurrency: `${amount} ${data.payCurrency}`,
-    receiveAmountWithCurrency: `${receiveAmount} ${data.receiveCurrency}`,
-    recipientBankDisplay: data.recipientBank || data.recipientName,
-    payerIdLabelDisplay: `${t.payerLabels[data.payerIdLabel] || data.payerIdLabel}:`,
-    recipientAccountLabelDisplay: `${t.recipientLabels[data.recipientAccountLabel] || data.recipientAccountLabel}:`
-  };
-}
-
-function applyReceiptLanguage(language) {
-  const t = getReceiptCopy(language);
-  document.documentElement.lang = language === "en" ? "en" : "zh-CN";
-  preview.querySelectorAll("[data-i18n]").forEach((node) => {
-    node.textContent = t[node.dataset.i18n] || "";
-  });
-}
-
-function applyReceiptStyle(style) {
-  preview.querySelectorAll("[data-style-panel]").forEach((panel) => {
-    panel.classList.toggle("is-hidden", panel.dataset.stylePanel !== style);
-  });
-}
-
-function applyFormStyle(style) {
-  form.querySelectorAll("[data-form-style]").forEach((node) => {
-    const styles = node.dataset.formStyle.split(/\s+/);
-    node.classList.toggle("is-hidden", !styles.includes(style));
-  });
-  applyAmountMode(style);
-}
-
-function syncPayerAddress() {
-  const address = payerCompanies[form.elements.payerNameVoucher.value];
-  if (address) {
-    form.elements.payerAddress.value = address;
+function syncTemplateReferences() {
+  if (activeStyle === "gc") {
+    form.elements.payerRef.value = form.elements.documentId.value;
+  }
+  if (activeStyle === "uq" && !form.elements.payerReference.value) {
+    form.elements.payerReference.value = form.elements.payerName.value;
   }
 }
 
-function updatePreview() {
-  const data = getData();
-  const display = buildDisplayData(data);
-  applyReceiptLanguage(display.language);
-  applyReceiptStyle(display.receiptStyle || "table");
-  applyFormStyle(display.receiptStyle || "table");
-  preview.querySelectorAll("[data-preview]").forEach((node) => {
-    const key = node.dataset.preview;
-    node.textContent = display[key] || "";
-  });
-  saveState.textContent = getReceiptCopy(display.language).synced;
+function syncCompanyAddress({ force = false } = {}) {
+  const name = form.elements.payerName.value.trim().toUpperCase();
+  const address = payerCompanies[name];
+  if (address && (force || !form.elements.payerAddress.value.trim())) {
+    form.elements.payerAddress.value = address;
+  }
+  if (activeStyle === "uq" && (!form.elements.payerReference.value.trim() || force)) {
+    form.elements.payerReference.value = form.elements.payerName.value;
+  }
 }
 
 function syncAmounts(event) {
   const target = event?.target;
-  if (!target) return;
-  if (activeStyle === "voucher" && ["amount", "receiveAmount", "fee"].includes(target.name)) {
-    syncVoucherPaymentAmount();
-  } else if (target.name === "amount") {
+  if (["jialian", "py"].includes(activeStyle)) {
+    const paidCents = moneyToCents(form.elements.receiveAmount.value) + moneyToCents(form.elements.fee.value);
+    form.elements.amount.value = centsToInputValue(paidCents);
+  } else if (target?.name === "amount") {
     form.elements.receiveAmount.value = target.value;
   }
-  if (target.name === "payCurrency") {
+  if (target?.name === "payCurrency") {
     form.elements.receiveCurrency.value = target.value;
+    form.elements.feeCurrency.value = target.value;
   }
-  if (target.name === "orderNo") {
-    syncPayerReference();
+}
+
+function applyFormMode(style) {
+  const ui = templateUi[style];
+  documentIdLabel.textContent = ui.idLabel;
+  amountLabel.textContent = ui.amountLabel;
+  purposeLabel.textContent = ui.purposeLabel;
+  memoLabel.textContent = ui.memoLabel;
+  form.elements.amount.readOnly = ["jialian", "py"].includes(style);
+  form.elements.language.disabled = false;
+  form.querySelectorAll("[data-templates]").forEach((node) => {
+    const templates = node.dataset.templates.split(/\s+/);
+    node.classList.toggle("is-hidden", !templates.includes(style));
+  });
+}
+
+function field(label, value, className = "") {
+  return `<div class="${className}"><div class="doc-label">${escapeHtml(label)}</div><div class="doc-value">${escapeHtml(value || "")}</div></div>`;
+}
+
+function renderGc(data) {
+  const en = data.language === "en";
+  const labels = en
+    ? {
+        title: "PAYMENT RECEIPT",
+        status: "Transaction Status:",
+        order: "Order ID:",
+        details: "Transaction Details",
+        started: "Initiated Date",
+        completed: "Completion Date",
+        amount: "Amount",
+        method: "Payment Method",
+        fee: "Processing Fee",
+        memo: "Transaction Remarks",
+        payer: "Payer",
+        recipient: "Recipient",
+        payerId: data.payerIdLabel === "客户编号" ? "Customer ID:" : data.payerIdLabel === "账户号码" ? "Account No.:" : "Company ID:",
+        ref: "Payment Reference:",
+        account: data.recipientAccountLabel === "银行账号" ? "Bank Account No.:" : data.recipientAccountLabel === "IBAN" ? "IBAN:" : "Account Number:",
+        type: "Recipient Type:",
+        summary: "Payment Summary",
+        payCurrency: "Currency",
+        payAmount: "Amount Sent",
+        receiveCurrency: "Currency",
+        receiveAmount: "Amount Received",
+        total: "Total:",
+        printDate: "Document Generation Date:",
+        valid: "This electronic receipt is valid without signature"
+      }
+    : {
+        title: "付款回单",
+        status: "交易状态:",
+        order: "订单编号:",
+        details: "交易详情",
+        started: "交易发起日期",
+        completed: "交易完成日期",
+        amount: "金额",
+        method: "支付方式",
+        fee: "手续费",
+        memo: "交易附言",
+        payer: "付款方",
+        recipient: "收款方",
+        payerId: `${data.payerIdLabel}:`,
+        ref: "付款参考号:",
+        account: `${data.recipientAccountLabel}:`,
+        type: "收款方类型:",
+        summary: "支付摘要",
+        payCurrency: "支付币种",
+        payAmount: "支付金额",
+        receiveCurrency: "收款币种",
+        receiveAmount: "收款金额",
+        total: "总计:",
+        printDate: "打印日期:",
+        valid: "本电子通知单无需签名即有效"
+      };
+  return `
+    <div class="gc-title">${labels.title}</div>
+    <div class="gc-rule"></div>
+    <div class="gc-topline">
+      <div>${labels.status} <strong>${escapeHtml(data.statusText)}</strong></div>
+      <div>${labels.order} <strong>${escapeHtml(data.documentId)}</strong></div>
+    </div>
+    <section class="gc-section">
+      <h3>${labels.details}</h3>
+      <div class="gc-detail-table">
+        <div class="gc-row"><span>${labels.started}</span><strong>${escapeHtml(data.startedAtGc)}</strong></div>
+        <div class="gc-row"><span>${labels.completed}</span><strong>${escapeHtml(data.completedAtGc)}</strong></div>
+        <div class="gc-row"><span>${labels.amount}</span><strong>${escapeHtml(formatMoney(data.amount))}</strong></div>
+        <div class="gc-row"><span>${labels.method}</span><strong>${escapeHtml(data.paymentMethodDisplay)}</strong></div>
+        <div class="gc-row"><span>${labels.fee}</span><strong>${escapeHtml(data.feeText)}</strong></div>
+        <div class="gc-row"><span>${labels.memo}</span><strong>${escapeHtml(data.memo)}</strong></div>
+      </div>
+    </section>
+    <section class="gc-section gc-party-grid">
+      <div>
+        <h3 class="gc-party-title">${labels.payer}</h3>
+        <div class="gc-party-card">
+          <div class="gc-party-name">${escapeHtml(data.payerName)}</div>
+          <div class="doc-label">${labels.payerId}</div>
+          <div class="doc-value">${escapeHtml(data.payerId)}</div>
+          <div class="doc-label">${labels.ref}</div>
+          <div class="doc-value">${escapeHtml(data.payerRef)}</div>
+        </div>
+      </div>
+      <div>
+        <h3 class="gc-party-title">${labels.recipient}</h3>
+        <div class="gc-party-card">
+          <div class="gc-party-name">${escapeHtml(data.recipientName)}</div>
+          <div class="doc-label">${labels.account}</div>
+          <div class="doc-value">${escapeHtml(data.recipientAccount)}</div>
+          <div class="doc-label">${labels.type}</div>
+          <div class="doc-value">${escapeHtml(data.recipientType)}</div>
+        </div>
+      </div>
+    </section>
+    <section class="gc-section">
+      <h3>${labels.summary}</h3>
+      <div class="gc-summary-table">
+        <div class="gc-summary-row gc-summary-head"><span>${labels.payCurrency}</span><span>${labels.payAmount}</span><span>${labels.receiveCurrency}</span><span>${labels.receiveAmount}</span></div>
+        <div class="gc-summary-row"><span>${escapeHtml(data.payCurrency)}</span><span>${escapeHtml(formatMoney(data.amount))}</span><span>${escapeHtml(data.receiveCurrency)}</span><span>${escapeHtml(formatMoney(data.receiveAmount))}</span></div>
+        <div class="gc-summary-row"><span>${labels.total}</span><strong>${escapeHtml(data.amountText)}</strong><span>${labels.total}</span><strong>${escapeHtml(data.receiveAmountText)}</strong></div>
+      </div>
+    </section>
+    <footer class="gc-footer"><span>${labels.printDate}</span><span>${escapeHtml(data.documentDateDisplay)}</span><span>${labels.valid}</span></footer>
+  `;
+}
+
+function renderJialian(data) {
+  const en = data.language === "en";
+  const labels = en
+    ? {
+        id: "Transaction ID",
+        time: "Timestamp",
+        title: "Payment Confirmation Letter",
+        details: "Payment Details",
+        enterprise: "Enterprise Name",
+        sent: "You sent",
+        fee: "Transaction Fee",
+        rate: "Exchange Rate",
+        received: "Received",
+        paymentTime: "Payment Time",
+        status: "Status",
+        reason: "Payment Reason",
+        payee: "Payee Information",
+        accountName: "Account Name",
+        bankName: "Bank Name",
+        accountNo: "Bank Account Number",
+        routing: "Routing Number"
+      }
+    : {
+        id: "交易编号",
+        time: "生成时间",
+        title: "支付确认函",
+        details: "付款明细",
+        enterprise: "企业名称",
+        sent: "您汇出",
+        fee: "手续费",
+        rate: "汇率",
+        received: "收款方收到",
+        paymentTime: "付款时间",
+        status: "付款状态",
+        reason: "付款原因",
+        payee: "收款方信息",
+        accountName: "账户名称",
+        bankName: "银行名称",
+        accountNo: "银行账号",
+        routing: "Routing Number"
+      };
+  return `
+    <div class="jl-meta">
+      ${field(labels.id, data.documentId)}
+      ${field(labels.time, data.documentDateDot)}
+    </div>
+    <h1 class="jl-title">${labels.title}</h1>
+    <section class="jl-section">
+      <h3>${labels.details}</h3>
+      <div class="jl-grid">
+        ${field(labels.enterprise, data.payerName)}
+        ${field(labels.sent, data.amountText)}
+        ${field(labels.fee, data.feeText)}
+        ${field(labels.rate, data.exchangeRate || "-")}
+        ${field(labels.received, data.receiveAmountText)}
+        ${field(labels.paymentTime, data.startedAtDisplay)}
+        ${field(labels.status, data.statusText)}
+        ${field(labels.reason, data.paymentPurposeText)}
+      </div>
+    </section>
+    <section class="jl-section">
+      <h3>${labels.payee}</h3>
+      <div class="jl-grid">
+        ${field(labels.accountName, data.recipientName)}
+        ${field(labels.bankName, data.recipientBank)}
+        ${field(labels.accountNo, data.recipientAccount)}
+        ${field(labels.routing, data.routingNumber)}
+      </div>
+    </section>
+  `;
+}
+
+function renderUq(data) {
+  return `
+    <div class="uq-meta">
+      ${field("Reference ID", data.documentId)}
+      ${field("Complete Date", data.completeDateDisplay)}
+    </div>
+    <h1 class="uq-title">Payout Confirmation</h1>
+    <section class="uq-section">
+      <h3>Payout Detail</h3>
+      <div class="uq-grid">
+        ${field("Amount Paid", data.amountText)}
+        ${field("Amount Received", data.receiveAmountText)}
+        ${field("Create Time", data.startedAtDisplay)}
+        ${field("Payout Date", data.payoutDateDisplay)}
+        ${field("Complete Time", data.completedAtDisplay)}
+        ${field("Payout Status", data.statusText)}
+        ${field("Payout Reason", data.paymentPurposeText)}
+        ${field("Payment Method", data.paymentMethodDisplay)}
+        ${field("Payout Reference", data.payerReference, "doc-wide")}
+      </div>
+    </section>
+    <section class="uq-section">
+      <h3>Receipt Detail</h3>
+      <div class="uq-grid">
+        ${field("Recipient Name", data.recipientName)}
+        ${field("Bank Name", data.recipientBank)}
+        ${field("Swift Code", data.recipientSwift)}
+        ${field("Account Number", data.recipientAccount)}
+        ${field("Address", data.recipientAddress, "doc-wide")}
+      </div>
+    </section>
+    <section class="uq-section">
+      <h3>Payer Detail</h3>
+      <div class="uq-grid">
+        ${field("Payer Name", data.payerName)}
+        ${field("Entity Type", data.payerEntityType)}
+        ${field("Address", data.payerAddress, "doc-wide")}
+      </div>
+    </section>
+    <footer class="uq-footer">Page 1 of 1</footer>
+  `;
+}
+
+function renderPy(data) {
+  return `
+    <header class="py-header">
+      <h1 class="py-title">Transfer Notice</h1>
+      <div class="py-meta">${field("Transaction ID", data.documentId)}</div>
+    </header>
+    <section class="py-card">
+      <h3>Payment details</h3>
+      <div class="py-grid">
+        ${field("Amount paid", data.amountText)}
+        ${field("Amount received", data.receiveAmountText)}
+        ${field("Transaction fee", data.feeText)}
+        ${field("Payment method", data.paymentMethodDisplay)}
+        ${field("Creation time", data.startedAtDisplay)}
+        ${field("Payment time", data.completedAtDisplay)}
+        ${field("Payment Status", data.statusText)}
+        ${field("Payment note", data.memo || "-")}
+        ${field("Payer Name", data.payerName, "doc-wide")}
+      </div>
+    </section>
+    <section class="py-card">
+      <h3>Recipient Information</h3>
+      <div class="py-grid">
+        ${field("Account Name", data.recipientName)}
+        ${field("Bank Account Number", data.recipientAccount)}
+        ${field("Bank Name", data.recipientBank)}
+        ${field("Swift Remittance Routing Number", data.recipientSwift)}
+      </div>
+    </section>
+    <div class="py-note">1.Time zone: China / Hong Kong<br />2.Not including intermediary or recipient bank charges</div>
+  `;
+}
+
+function renderPreview() {
+  const data = getData();
+  previewSurface.className = `paper ${data.receiptStyle}-paper`;
+  document.documentElement.lang = data.language === "en" ? "en" : "zh-CN";
+  if (data.receiptStyle === "gc") previewSurface.innerHTML = renderGc(data);
+  if (data.receiptStyle === "jialian") previewSurface.innerHTML = renderJialian(data);
+  if (data.receiptStyle === "uq") previewSurface.innerHTML = renderUq(data);
+  if (data.receiptStyle === "py") previewSurface.innerHTML = renderPy(data);
+  saveState.textContent = "已同步";
+}
+
+function updateAll(event) {
+  if (event?.target?.name === "receiptStyle") {
+    saveActiveStyleData();
+    loadStyleData(event.target.value);
+    renderPreview();
+    return;
   }
-  if (target.name === "payerNameVoucher") {
-    syncPayerAddress();
+  saveState.textContent = "同步中";
+  if (event?.target?.name === "documentId") syncTemplateReferences();
+  if (event?.target?.name === "payerName") {
+    syncCompanyAddress({ force: event.type === "change" });
     applyStoredPayerId({ clearIfMissing: event.type === "change" });
   }
-  if (target.name === "payerNameTable") {
-    applyStoredPayerId({ clearIfMissing: event.type === "change" });
-  }
-  if (target.name === "payerIdLabel") {
-    applyStoredPayerId();
-  }
+  if (event?.target?.name === "payerIdLabel") applyStoredPayerId();
+  syncAmounts(event);
+  saveActiveStyleData();
+  renderPreview();
 }
 
 function resetDemo() {
   styleData[activeStyle] = { ...styleDefaults[activeStyle] };
   loadStyleData(activeStyle);
   applyStoredPayerId();
-  updatePreview();
+  renderPreview();
 }
 
-function newOrder() {
-  const orderNo = generateOrderNo();
-  form.elements.orderNo.value = orderNo;
-  syncPayerReference();
+function newDocumentId() {
+  form.elements.documentId.value = generateDocumentId(activeStyle);
+  syncTemplateReferences();
   saveActiveStyleData();
-  updatePreview();
+  renderPreview();
+}
+
+function setCurrentTime() {
+  const now = new Date();
+  const done = new Date(now.getTime() + 2 * 60 * 1000);
+  form.elements.documentDate.value = toDateInputValue(now);
+  form.elements.payoutDate.value = toDateInputValue(now);
+  form.elements.completeDate.value = toDateInputValue(done);
+  form.elements.startedAt.value = toLocalInputValue(now);
+  form.elements.completedAt.value = toLocalInputValue(done);
+  saveActiveStyleData();
+  renderPreview();
 }
 
 function randomizePayerId() {
   form.elements.payerId.value = generatePayerId(form.elements.payerIdLabel.value);
+  saveCurrentPayerId();
   saveActiveStyleData();
-  updatePreview();
+  renderPreview();
 }
 
-function randomizePayerReference() {
-  syncPayerReference();
-  saveActiveStyleData();
-  updatePreview();
-}
-
-function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 2) {
-  const chars = Array.from(String(text || ""));
-  let line = "";
-  let drawn = 0;
-  chars.forEach((char, index) => {
-    const testLine = line + char;
-    const isLast = index === chars.length - 1;
-    if (ctx.measureText(testLine).width > maxWidth && line) {
-      drawn += 1;
-      if (drawn >= maxLines) return;
-      ctx.fillText(line, x, y);
-      y += lineHeight;
-      line = char;
-    } else {
-      line = testLine;
-    }
-    if (isLast && drawn < maxLines) {
-      ctx.fillText(line, x, y);
-    }
-  });
-}
-
-function drawRoundRect(ctx, x, y, width, height, radius) {
-  const r = Math.min(radius, width / 2, height / 2);
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + width, y, x + width, y + height, r);
-  ctx.arcTo(x + width, y + height, x, y + height, r);
-  ctx.arcTo(x, y + height, x, y, r);
-  ctx.arcTo(x, y, x + width, y, r);
-  ctx.closePath();
-}
-
-function drawCell(ctx, x, y, width, height, text, options = {}) {
-  const {
-    fill = "#ffffff",
-    stroke = "#d9dee7",
-    color = "#080f18",
-    weight = 400,
-    size = 25,
-    align = "left",
-    padding = 22,
-    wrap = false
-  } = options;
-  ctx.fillStyle = fill;
-  ctx.fillRect(x, y, width, height);
-  ctx.strokeStyle = stroke;
-  ctx.lineWidth = 1;
-  ctx.strokeRect(x, y, width, height);
-  ctx.fillStyle = color;
-  ctx.font = `${weight} ${size}px -apple-system, BlinkMacSystemFont, "PingFang SC", Arial`;
-  ctx.textBaseline = "middle";
-  ctx.textAlign = align;
-  const textX = align === "right" ? x + width - padding : x + padding;
-  const textY = y + height / 2;
-  if (wrap) {
-    ctx.textBaseline = "top";
-    wrapText(ctx, text, textX, y + 16, width - padding * 2, size + 8, 2);
-    ctx.textBaseline = "middle";
-  } else {
-    ctx.fillText(String(text || ""), textX, textY, width - padding * 2);
-  }
-}
-
-function drawReceiptCanvas() {
-  const data = buildDisplayData(getData());
-  if (data.receiptStyle === "voucher") {
-    return drawVoucherCanvas(data);
-  }
-  const t = getReceiptCopy(data.language);
-  const canvas = document.createElement("canvas");
-  const scale = 2;
-  const width = 1200;
-  const height = 1340;
-  canvas.width = width * scale;
-  canvas.height = height * scale;
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
-  const ctx = canvas.getContext("2d");
-  ctx.scale(scale, scale);
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, width, height);
-
-  const margin = 54;
-  const content = width - margin * 2;
-
-  ctx.fillStyle = "#080f18";
-  ctx.font = '400 24px -apple-system, BlinkMacSystemFont, "PingFang SC", Arial';
-  ctx.textBaseline = "middle";
-  ctx.textAlign = "left";
-  ctx.fillText(t.statusLabel, margin, 58);
-  const statusLabelWidth = ctx.measureText(t.statusLabel).width;
-  ctx.font = '700 24px -apple-system, BlinkMacSystemFont, "PingFang SC", Arial';
-  ctx.fillText(data.status, margin + statusLabelWidth + 14, 58);
-  ctx.font = '700 24px -apple-system, BlinkMacSystemFont, "PingFang SC", Arial';
-  ctx.textAlign = "right";
-  ctx.fillText(data.orderNo, width - margin, 58);
-  const orderNoWidth = ctx.measureText(data.orderNo).width;
-  ctx.font = '400 24px -apple-system, BlinkMacSystemFont, "PingFang SC", Arial';
-  ctx.fillText(t.orderNoLabel, width - margin - orderNoWidth - 14, 58);
-
-  ctx.textAlign = "left";
-  ctx.font = '700 25px -apple-system, BlinkMacSystemFont, "PingFang SC", Arial';
-  ctx.fillText(t.transactionDetails, margin, 152);
-
-  const tableX = margin;
-  let tableY = 178;
-  const labelW = 320;
-  const valueW = content - labelW;
-  const rowH = 70;
-  const details = [
-    [t.startedAt, data.startedAtDisplay],
-    [t.completedAt, data.completedAtDisplay],
-    [t.amount, data.amountDisplay],
-    [t.paymentMethod, data.paymentMethod],
-    [t.fee, data.feeDisplay],
-    [t.memo, data.memo]
-  ];
-  details.forEach(([label, value]) => {
-    drawCell(ctx, tableX, tableY, labelW, rowH, label, { fill: "#f7f8fa", weight: 600, size: 24 });
-    drawCell(ctx, tableX + labelW, tableY, valueW, rowH, value, { weight: 700, size: 24, wrap: label === t.memo });
-    tableY += rowH;
-  });
-
-  const partyY = tableY + 72;
-  ctx.font = '700 25px -apple-system, BlinkMacSystemFont, "PingFang SC", Arial';
-  ctx.fillStyle = "#080f18";
-  ctx.fillText(t.payer, margin, partyY - 26);
-  ctx.fillText(t.recipient, margin + content / 2 + 24, partyY - 26);
-
-  function drawPartyCard(x, y, cardData) {
-    const cardW = content / 2 - 24;
-    const hasVerify = Boolean(cardData.verify);
-    const cardH = hasVerify ? 290 : 246;
-    drawRoundRect(ctx, x, y, cardW, cardH, 5);
-    ctx.fillStyle = "#ffffff";
-    ctx.fill();
-    ctx.strokeStyle = "#d9dee7";
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    ctx.fillStyle = "#080f18";
-    ctx.font = '700 27px -apple-system, BlinkMacSystemFont, "PingFang SC", Arial';
-    ctx.fillText(cardData.name, x + 28, y + 48, cardW - 56);
-    ctx.font = '400 22px -apple-system, BlinkMacSystemFont, "PingFang SC", Arial';
-    ctx.fillStyle = "#4b5563";
-    ctx.fillText(cardData.firstLabel, x + 28, y + 94);
-    ctx.fillStyle = "#080f18";
-    ctx.font = '700 25px -apple-system, BlinkMacSystemFont, "PingFang SC", Arial';
-    ctx.fillText(cardData.firstValue, x + 28, y + 136, cardW - 56);
-    ctx.font = '400 22px -apple-system, BlinkMacSystemFont, "PingFang SC", Arial';
-    ctx.fillStyle = "#4b5563";
-    ctx.fillText(cardData.secondLabel, x + 28, y + 180);
-    ctx.fillStyle = "#080f18";
-    ctx.font = '700 25px -apple-system, BlinkMacSystemFont, "PingFang SC", Arial';
-    ctx.fillText(cardData.secondValue, x + 28, y + 222, cardW - 56);
-
-    if (hasVerify) {
-      ctx.fillStyle = "#f8fafc";
-      ctx.fillRect(x, y + cardH - 54, cardW, 54);
-      ctx.strokeStyle = "#edf0f4";
-      ctx.beginPath();
-      ctx.moveTo(x, y + cardH - 54);
-      ctx.lineTo(x + cardW, y + cardH - 54);
-      ctx.stroke();
-      ctx.fillStyle = "#4b5563";
-      ctx.font = '400 20px -apple-system, BlinkMacSystemFont, "PingFang SC", Arial';
-      ctx.fillText(cardData.verify, x + 24, y + cardH - 27, cardW - 48);
-    }
-  }
-
-  drawPartyCard(margin, partyY, {
-    name: data.payerName,
-    firstLabel: data.payerIdLabelDisplay,
-    firstValue: data.payerId,
-    secondLabel: t.paymentReference,
-    secondValue: data.payerRef,
-    verify: data.payerVerify
-  });
-  drawPartyCard(margin + content / 2 + 24, partyY, {
-    name: data.recipientName,
-    firstLabel: data.recipientAccountLabelDisplay,
-    firstValue: data.recipientAccount,
-    secondLabel: t.recipientType,
-    secondValue: data.recipientType,
-    verify: data.recipientVerify
-  });
-
-  const summaryY = partyY + 390;
-  ctx.font = '700 25px -apple-system, BlinkMacSystemFont, "PingFang SC", Arial';
-  ctx.fillStyle = "#080f18";
-  ctx.fillText(t.paymentSummary, margin, summaryY - 24);
-
-  const colW = content / 4;
-  const summaryRows = [
-    [t.payCurrency, t.payAmount, t.receiveCurrency, t.receiveAmount],
-    [data.payCurrency, data.amountDisplay, data.receiveCurrency, data.receiveAmountDisplay],
-    [t.totalLabel, data.amountWithCurrency, t.totalLabel, data.receiveAmountWithCurrency]
-  ];
-  summaryRows.forEach((row, rowIndex) => {
-    row.forEach((value, colIndex) => {
-      drawCell(ctx, margin + colW * colIndex, summaryY + rowH * rowIndex, colW, rowH, value, {
-        fill: rowIndex === 0 ? "#f8fafc" : rowIndex === 2 ? "#fbfcfd" : "#ffffff",
-        weight: rowIndex === 0 ? 700 : 700,
-        size: rowIndex === 0 ? 22 : 24
-      });
-    });
-  });
-
-  return canvas;
-}
-
-function drawVoucherCanvas(data) {
-  const t = getReceiptCopy(data.language);
+function createCanvas() {
   const canvas = document.createElement("canvas");
   const scale = 2;
   const width = 1200;
@@ -786,96 +862,355 @@ function drawVoucherCanvas(data) {
   ctx.scale(scale, scale);
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, width, height);
+  return { canvas, ctx, width, height };
+}
 
-  const margin = 140;
-  const right = width - margin;
-  const colGap = 190;
-  const colW = (right - margin - colGap) / 2;
-  const bankFont = 'Arial, Helvetica, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif';
+const bankFont = 'Arial, Helvetica, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
 
-  function text(value, x, y, options = {}) {
-    const {
-      size = 22,
-      weight = 400,
-      color = "#111111",
-      align = "left",
-      family = bankFont,
-      maxWidth
-    } = options;
-    ctx.fillStyle = color;
-    ctx.font = `${weight} ${size}px ${family}`;
-    ctx.textAlign = align;
-    ctx.textBaseline = "top";
-    ctx.fillText(String(value || ""), x, y, maxWidth);
+function setFont(ctx, size, weight = 400, family = bankFont) {
+  ctx.font = `${weight} ${size}px ${family}`;
+}
+
+function drawText(ctx, text, x, y, options = {}) {
+  const {
+    size = 22,
+    weight = 400,
+    color = "#111722",
+    align = "left",
+    maxWidth = 1000,
+    family = bankFont
+  } = options;
+  ctx.fillStyle = color;
+  setFont(ctx, size, weight, family);
+  ctx.textBaseline = "top";
+  ctx.textAlign = align;
+  ctx.fillText(String(text || ""), x, y, maxWidth);
+}
+
+function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 3) {
+  const raw = String(text || "");
+  const words = raw.includes(" ") ? raw.split(/(\s+)/) : Array.from(raw);
+  let line = "";
+  let lines = 0;
+  for (let i = 0; i < words.length; i += 1) {
+    const test = line + words[i];
+    if (ctx.measureText(test).width > maxWidth && line) {
+      ctx.fillText(line.trimEnd(), x, y);
+      y += lineHeight;
+      lines += 1;
+      if (lines >= maxLines) return lines;
+      line = words[i].trimStart();
+    } else {
+      line = test;
+    }
   }
-
-  function labelValue(label, value, x, y, maxWidth = colW) {
-    text(label, x, y, { size: 20, color: "#777777", maxWidth });
-    text(value, x, y + 30, { size: 21, weight: 700, maxWidth });
+  if (line && lines < maxLines) {
+    ctx.fillText(line.trimEnd(), x, y);
+    lines += 1;
   }
+  return lines;
+}
 
-  function labelValueWrapped(label, value, x, y, maxWidth = colW) {
-    text(label, x, y, { size: 20, color: "#777777", maxWidth });
-    ctx.fillStyle = "#111111";
-    ctx.font = `700 21px ${bankFont}`;
-    ctx.textAlign = "left";
-    ctx.textBaseline = "top";
-    wrapText(ctx, value, x, y + 30, maxWidth, 30, 3);
-  }
+function drawWrapped(ctx, text, x, y, maxWidth, options = {}) {
+  const { size = 22, weight = 700, color = "#111722", lineHeight = size + 8, maxLines = 3 } = options;
+  ctx.fillStyle = color;
+  setFont(ctx, size, weight);
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  return wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines);
+}
 
-  const metaY = 58;
-  const metaW = 150;
-  labelValue(t.serialNo, data.orderNo, right - metaW * 3 - 36, metaY, metaW + 20);
-  labelValue(t.issuedAt, data.issueDateDisplay, right - metaW * 2 + 4, metaY, metaW);
-  labelValue(t.timezone, data.timezoneDisplay, right - metaW + 40, metaY, metaW);
-
-  ctx.strokeStyle = "#e7e7e7";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(margin, 150);
-  ctx.lineTo(right, 150);
-  ctx.stroke();
-
-  text(t.voucherTitle, margin, 205, { size: 34, weight: 700 });
-
-  let y = 330;
-  text(t.paymentDetails, margin, y, { size: 28, weight: 700 });
-  y += 70;
-  labelValue(t.paymentAmount, data.paymentAmountWithCurrency, margin, y);
-  labelValue(t.fee, data.feeDisplay, margin + colW + colGap, y);
-  y += 80;
-  labelValue(t.receiveAmount, data.receiveAmountWithCurrency, margin, y);
-  labelValue(t.transactionTime, data.startedAtVoucher, margin + colW + colGap, y);
-  y += 80;
-  labelValue(t.completedTime, data.completedAtVoucher, margin, y);
-  labelValueWrapped(t.remittanceMemo, data.memo, margin + colW + colGap, y);
-
-  y += 140;
-  text(t.recipient, margin, y, { size: 28, weight: 700 });
-  y += 70;
-  labelValueWrapped(t.name, data.recipientName, margin, y);
-  labelValueWrapped(t.bank, data.recipientBankDisplay, margin + colW + colGap, y);
-  y += 90;
-  labelValue(t.bankAccount, data.recipientAccount, margin, y);
-  labelValue("SWIFT CODE", data.recipientSwift, margin + colW + colGap, y);
-
-  y += 130;
-  text(t.payer, margin, y, { size: 28, weight: 700 });
-  y += 70;
-  labelValueWrapped(t.payerName, data.payerName, margin, y, right - margin);
-  y += 90;
-  labelValueWrapped(t.businessAddress, data.payerAddress, margin, y, right - margin);
-
-  ctx.fillStyle = "#f4f5f8";
-  ctx.fillRect(0, height - 120, width, 120);
-  text("Photon Dance (Hong Kong) Limited", margin, height - 92, { size: 17, color: "#333333" });
-  text(data.language === "en" ? "Page 1 of 1" : "第 1 页，共 1 页", right, height - 92, {
-    size: 17,
-    color: "#333333",
-    align: "right"
+function drawLabelValue(ctx, label, value, x, y, width, options = {}) {
+  const labelSize = options.labelSize || 20;
+  const valueSize = options.valueSize || 23;
+  drawText(ctx, label, x, y, { size: labelSize, color: options.labelColor || "#687082", maxWidth: width });
+  drawWrapped(ctx, value, x, y + labelSize + 10, width, {
+    size: valueSize,
+    weight: options.weight || 700,
+    lineHeight: valueSize + 8,
+    maxLines: options.maxLines || 2
   });
+}
 
+function drawGcCanvas(data) {
+  const { canvas, ctx, width, height } = createCanvas();
+  const en = data.language === "en";
+  const labels = en
+    ? {
+        title: "PAYMENT RECEIPT",
+        status: "Transaction Status:",
+        order: "Order ID:",
+        details: "Transaction Details",
+        rows: ["Initiated Date", "Completion Date", "Amount", "Payment Method", "Processing Fee", "Transaction Remarks"],
+        payer: "Payer",
+        recipient: "Recipient",
+        payerId: data.payerIdLabel === "客户编号" ? "Customer ID:" : data.payerIdLabel === "账户号码" ? "Account No.:" : "Company ID:",
+        ref: "Payment Reference:",
+        account: data.recipientAccountLabel === "银行账号" ? "Bank Account No.:" : "Account Number:",
+        type: "Recipient Type:",
+        summary: "Payment Summary",
+        head: ["Currency", "Amount Sent", "Currency", "Amount Received"],
+        total: "Total:",
+        footerDate: "Document Generation Date:",
+        valid: "This electronic receipt is valid without signature"
+      }
+    : {
+        title: "付款回单",
+        status: "交易状态:",
+        order: "订单编号:",
+        details: "交易详情",
+        rows: ["交易发起日期", "交易完成日期", "金额", "支付方式", "手续费", "交易附言"],
+        payer: "付款方",
+        recipient: "收款方",
+        payerId: `${data.payerIdLabel}:`,
+        ref: "付款参考号:",
+        account: `${data.recipientAccountLabel}:`,
+        type: "收款方类型:",
+        summary: "支付摘要",
+        head: ["支付币种", "支付金额", "收款币种", "收款金额"],
+        total: "总计:",
+        footerDate: "打印日期:",
+        valid: "本电子通知单无需签名即有效"
+      };
+  const margin = 36;
+  drawText(ctx, labels.title, width - margin, 100, { size: 29, weight: 700, align: "right", color: "#263244" });
+  ctx.strokeStyle = "#dfe3ea";
+  ctx.beginPath();
+  ctx.moveTo(0, 172);
+  ctx.lineTo(width, 172);
+  ctx.stroke();
+  drawText(ctx, labels.status, margin + 4, 218, { size: 23 });
+  drawText(ctx, data.statusText, margin + 148, 218, { size: 23, weight: 700 });
+  drawText(ctx, `${labels.order} ${data.documentId}`, width - margin, 218, { size: 23, align: "right" });
+  drawText(ctx, labels.details, margin + 4, 296, { size: 24, weight: 700, color: "#344154" });
+  const tableX = margin;
+  let tableY = 332;
+  const labelW = 306;
+  const rowH = 66;
+  const rows = [
+    [labels.rows[0], data.startedAtGc],
+    [labels.rows[1], data.completedAtGc],
+    [labels.rows[2], formatMoney(data.amount)],
+    [labels.rows[3], data.paymentMethodDisplay],
+    [labels.rows[4], data.feeText],
+    [labels.rows[5], data.memo]
+  ];
+  rows.forEach(([label, value]) => {
+    ctx.fillStyle = "#f7f8fa";
+    ctx.fillRect(tableX, tableY, labelW, rowH);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(tableX + labelW, tableY, width - margin * 2 - labelW, rowH);
+    ctx.strokeStyle = "#d9dee7";
+    ctx.strokeRect(tableX, tableY, width - margin * 2, rowH);
+    drawText(ctx, label, tableX + 18, tableY + 18, { size: 22 });
+    drawText(ctx, value, tableX + labelW + 8, tableY + 18, { size: 22, maxWidth: width - margin * 2 - labelW - 20 });
+    tableY += rowH;
+  });
+  const partyY = tableY + 92;
+  const cardW = (width - margin * 2 - 46) / 2;
+  function partyCard(x, title, name, firstLabel, firstValue, secondLabel, secondValue) {
+    drawText(ctx, title, x, partyY - 32, { size: 23, weight: 700, color: "#344154" });
+    ctx.strokeStyle = "#d9dee7";
+    ctx.strokeRect(x, partyY, cardW, 258);
+    drawWrapped(ctx, name, x + 28, partyY + 28, cardW - 56, { size: 24, weight: 500, maxLines: 3 });
+    drawLabelValue(ctx, firstLabel, firstValue, x + 28, partyY + 104, cardW - 56, { labelSize: 20, valueSize: 22, weight: 500 });
+    drawLabelValue(ctx, secondLabel, secondValue, x + 28, partyY + 174, cardW - 56, { labelSize: 20, valueSize: 22, weight: 500 });
+  }
+  partyCard(margin, labels.payer, data.payerName, labels.payerId, data.payerId, labels.ref, data.payerRef);
+  partyCard(margin + cardW + 46, labels.recipient, data.recipientName, labels.account, data.recipientAccount, labels.type, data.recipientType);
+  const summaryY = partyY + 360;
+  drawText(ctx, labels.summary, margin, summaryY - 34, { size: 23, weight: 700, color: "#344154" });
+  const colW = (width - margin * 2) / 4;
+  const summaryRows = [labels.head, [data.payCurrency, formatMoney(data.amount), data.receiveCurrency, formatMoney(data.receiveAmount)], [labels.total, data.amountText, labels.total, data.receiveAmountText]];
+  summaryRows.forEach((row, ri) => {
+    row.forEach((text, ci) => {
+      const x = margin + colW * ci;
+      const y = summaryY + rowH * ri;
+      ctx.fillStyle = ri === 0 ? "#f7f8fa" : "#ffffff";
+      ctx.fillRect(x, y, colW, rowH);
+      ctx.strokeStyle = "#d9dee7";
+      ctx.strokeRect(x, y, colW, rowH);
+      drawText(ctx, text, x + 22, y + 18, { size: 22, weight: ri === 0 || ri === 2 ? 700 : 400, maxWidth: colW - 44 });
+    });
+  });
+  ctx.strokeStyle = "#dfe3ea";
+  ctx.beginPath();
+  ctx.moveTo(0, height - 92);
+  ctx.lineTo(width, height - 92);
+  ctx.stroke();
+  drawText(ctx, `${labels.footerDate} ${data.documentDateDisplay}`, width - 330, height - 70, { size: 17 });
+  drawText(ctx, labels.valid, width - 330, height - 38, { size: 17 });
   return canvas;
+}
+
+function drawJialianCanvas(data) {
+  const { canvas, ctx, width } = createCanvas();
+  const en = data.language === "en";
+  const labels = en
+    ? {
+        id: "Transaction ID",
+        time: "Timestamp",
+        title: "Payment Confirmation Letter",
+        details: "Payment Details",
+        enterprise: "Enterprise Name",
+        sent: "You sent",
+        fee: "Transaction Fee",
+        rate: "Exchange Rate",
+        received: "Received",
+        paymentTime: "Payment Time",
+        status: "Status",
+        reason: "Payment Reason",
+        payee: "Payee Information",
+        accountName: "Account Name",
+        bankName: "Bank Name",
+        accountNo: "Bank Account Number",
+        routing: "Routing Number"
+      }
+    : {
+        id: "交易编号",
+        time: "生成时间",
+        title: "支付确认函",
+        details: "付款明细",
+        enterprise: "企业名称",
+        sent: "您汇出",
+        fee: "手续费",
+        rate: "汇率",
+        received: "收款方收到",
+        paymentTime: "付款时间",
+        status: "付款状态",
+        reason: "付款原因",
+        payee: "收款方信息",
+        accountName: "账户名称",
+        bankName: "银行名称",
+        accountNo: "银行账号",
+        routing: "Routing Number"
+      };
+  const margin = 144;
+  const colW = 360;
+  drawLabelValue(ctx, labels.id, data.documentId, width - 530, 64, 250, { labelSize: 20, valueSize: 21 });
+  drawLabelValue(ctx, labels.time, data.documentDateDot, width - 250, 64, 180, { labelSize: 20, valueSize: 21 });
+  drawText(ctx, labels.title, margin, 232, { size: en ? 42 : 44, weight: 700 });
+  drawText(ctx, labels.details, margin, 370, { size: 34, weight: 700 });
+  const left = margin;
+  const right = margin + 500;
+  let y = 460;
+  drawLabelValue(ctx, labels.enterprise, data.payerName, left, y, colW);
+  drawLabelValue(ctx, labels.sent, data.amountText, right, y, colW);
+  y += 90;
+  drawLabelValue(ctx, labels.fee, data.feeText, left, y, colW);
+  drawLabelValue(ctx, labels.rate, data.exchangeRate || "-", right, y, colW);
+  y += 90;
+  drawLabelValue(ctx, labels.received, data.receiveAmountText, left, y, colW);
+  drawLabelValue(ctx, labels.paymentTime, data.startedAtDisplay, right, y, colW);
+  y += 90;
+  drawLabelValue(ctx, labels.status, data.statusText, left, y, colW);
+  drawLabelValue(ctx, labels.reason, data.paymentPurposeText, right, y, colW);
+  y += 150;
+  drawText(ctx, labels.payee, margin, y, { size: 34, weight: 700 });
+  y += 90;
+  drawLabelValue(ctx, labels.accountName, data.recipientName, left, y, colW, { maxLines: 2 });
+  drawLabelValue(ctx, labels.bankName, data.recipientBank, right, y, colW, { maxLines: 2 });
+  y += 90;
+  drawLabelValue(ctx, labels.accountNo, data.recipientAccount, left, y, colW);
+  drawLabelValue(ctx, labels.routing, data.routingNumber, right, y, colW);
+  return canvas;
+}
+
+function drawUqCanvas(data) {
+  const { canvas, ctx, width, height } = createCanvas();
+  const margin = 120;
+  const rightX = margin + 515;
+  const colW = 430;
+  drawLabelValue(ctx, "Reference ID", data.documentId, width - 510, 48, 220, { labelSize: 20, valueSize: 22 });
+  drawLabelValue(ctx, "Complete Date", data.completeDateDisplay, width - 260, 48, 160, { labelSize: 20, valueSize: 22 });
+  drawText(ctx, "Payout Confirmation", margin, 150, { size: 40, weight: 700 });
+  drawText(ctx, "Payout Detail", margin, 260, { size: 31, weight: 700 });
+  let y = 320;
+  drawLabelValue(ctx, "Amount Paid", data.amountText, margin, y, colW);
+  drawLabelValue(ctx, "Amount Received", data.receiveAmountText, rightX, y, colW);
+  y += 70;
+  drawLabelValue(ctx, "Create Time", data.startedAtDisplay, margin, y, colW);
+  drawLabelValue(ctx, "Payout Date", data.payoutDateDisplay, rightX, y, colW);
+  y += 70;
+  drawLabelValue(ctx, "Complete Time", data.completedAtDisplay, margin, y, colW);
+  drawLabelValue(ctx, "Payout Status", data.statusText, rightX, y, colW);
+  y += 70;
+  drawLabelValue(ctx, "Payout Reason", data.paymentPurposeText, margin, y, colW);
+  drawLabelValue(ctx, "Payment Method", data.paymentMethodDisplay, rightX, y, colW);
+  y += 70;
+  drawLabelValue(ctx, "Payout Reference", data.payerReference, margin, y, colW * 2);
+  y += 120;
+  drawText(ctx, "Receipt Detail", margin, y, { size: 31, weight: 700 });
+  y += 58;
+  drawLabelValue(ctx, "Recipient Name", data.recipientName, margin, y, colW);
+  drawLabelValue(ctx, "Bank Name", data.recipientBank, rightX, y, colW);
+  y += 70;
+  drawLabelValue(ctx, "Swift Code", data.recipientSwift, margin, y, colW);
+  drawLabelValue(ctx, "Account Number", data.recipientAccount, rightX, y, colW);
+  y += 70;
+  drawLabelValue(ctx, "Address", data.recipientAddress, margin, y, colW * 2 + 80, { maxLines: 3 });
+  y += 150;
+  drawText(ctx, "Payer Detail", margin, y, { size: 31, weight: 700 });
+  y += 58;
+  drawLabelValue(ctx, "Payer Name", data.payerName, margin, y, colW);
+  drawLabelValue(ctx, "Entity Type", data.payerEntityType, rightX, y, colW);
+  y += 70;
+  drawLabelValue(ctx, "Address", data.payerAddress, margin, y, colW * 2 + 80, { maxLines: 3 });
+  ctx.fillStyle = "#f2f3f5";
+  ctx.fillRect(0, height - 130, width, 130);
+  drawText(ctx, "Page 1 of 1", width - 120, height - 84, { size: 18, align: "right" });
+  return canvas;
+}
+
+function drawPyCanvas(data) {
+  const { canvas, ctx, width } = createCanvas();
+  const margin = 72;
+  drawText(ctx, "Transfer Notice", margin, 230, { size: 50, weight: 700 });
+  drawLabelValue(ctx, "Transaction ID", data.documentId, width - 455, 200, 390, { labelSize: 27, valueSize: 31, weight: 500 });
+  function card(x, y, h, title) {
+    ctx.strokeStyle = "#dfe3eb";
+    ctx.strokeRect(x, y, width - margin * 2, h);
+    drawText(ctx, title, x + 40, y + 46, { size: 40, weight: 700 });
+  }
+  const left = margin + 40;
+  const right = margin + 520;
+  const colW = 450;
+  card(margin, 322, 640, "Payment details");
+  let y = 436;
+  drawLabelValue(ctx, "Amount paid", data.amountText, left, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
+  drawLabelValue(ctx, "Amount received", data.receiveAmountText, right, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
+  y += 98;
+  drawLabelValue(ctx, "Transaction fee", data.feeText, left, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
+  drawLabelValue(ctx, "Payment method", data.paymentMethodDisplay, right, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
+  y += 98;
+  drawLabelValue(ctx, "Creation time", data.startedAtDisplay, left, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
+  drawLabelValue(ctx, "Payment time", data.completedAtDisplay, right, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
+  y += 98;
+  drawLabelValue(ctx, "Payment Status", data.statusText, left, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
+  drawLabelValue(ctx, "Payment note", data.memo || "-", right, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
+  y += 98;
+  drawLabelValue(ctx, "Payer Name", data.payerName, left, y, colW * 2, { labelSize: 27, valueSize: 31, weight: 500, maxLines: 2 });
+  card(margin, 998, 354, "Recipient Information");
+  y = 1122;
+  drawLabelValue(ctx, "Account Name", data.recipientName, left, y, colW, { labelSize: 27, valueSize: 31, weight: 500, maxLines: 2 });
+  drawLabelValue(ctx, "Bank Account Number", data.recipientAccount, right, y, colW, { labelSize: 27, valueSize: 31, weight: 500, maxLines: 2 });
+  y += 104;
+  drawLabelValue(ctx, "Bank Name", data.recipientBank, left, y, colW, { labelSize: 27, valueSize: 31, weight: 500, maxLines: 2 });
+  drawLabelValue(ctx, "Swift Remittance Routing Number", data.recipientSwift, right, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
+  ctx.fillStyle = "#f4f4f8";
+  ctx.fillRect(margin, 1400, width - margin * 2, 192);
+  drawText(ctx, "1.Time zone: China / Hong Kong", margin + 30, 1440, { size: 25, color: "#667085" });
+  drawText(ctx, "2.Not including intermediary or recipient bank charges", margin + 30, 1480, { size: 25, color: "#667085" });
+  return canvas;
+}
+
+function drawReceiptCanvas() {
+  syncAmounts();
+  const data = getData();
+  if (data.receiptStyle === "gc") return drawGcCanvas(data);
+  if (data.receiptStyle === "jialian") return drawJialianCanvas(data);
+  if (data.receiptStyle === "uq") return drawUqCanvas(data);
+  return drawPyCanvas(data);
 }
 
 function downloadBlob(blob, fileName) {
@@ -903,7 +1238,7 @@ function buildPdf(canvas) {
   const jpegBytes = canvasToJpegBytes(canvas);
   const pageWidth = 595.28;
   const pageHeight = 841.89;
-  const margin = 24;
+  const margin = 0;
   const imageRatio = canvas.width / canvas.height;
   let imageWidth = pageWidth - margin * 2;
   let imageHeight = imageWidth / imageRatio;
@@ -956,55 +1291,43 @@ function buildPdf(canvas) {
 }
 
 function exportPng() {
-  syncPayerReference();
-  syncVoucherPaymentAmount();
+  syncTemplateReferences();
+  syncAmounts();
   saveActiveStyleData();
   saveCurrentPayerId();
   const canvas = drawReceiptCanvas();
   canvas.toBlob((blob) => {
-    if (blob) downloadBlob(blob, `payout-confirmation-${form.elements.orderNo.value || "export"}.png`);
+    if (blob) downloadBlob(blob, `${activeStyle}-${form.elements.documentId.value || "export"}.png`);
   }, "image/png");
 }
 
 function exportPdf() {
-  syncPayerReference();
-  syncVoucherPaymentAmount();
+  syncTemplateReferences();
+  syncAmounts();
   saveActiveStyleData();
   saveCurrentPayerId();
   const canvas = drawReceiptCanvas();
-  const pdfBlob = buildPdf(canvas);
-  downloadBlob(pdfBlob, `payout-confirmation-${form.elements.orderNo.value || "export"}.pdf`);
+  downloadBlob(buildPdf(canvas), `${activeStyle}-${form.elements.documentId.value || "export"}.pdf`);
 }
 
-function handleFormUpdate(event) {
-  if (event.target?.name === "receiptStyle") {
-    saveActiveStyleData();
-    loadStyleData(event.target.value);
-    updatePreview();
-    return;
-  }
-  saveState.textContent = getReceiptCopy(form.elements.language.value).syncing;
-  syncAmounts(event);
-  saveActiveStyleData();
-  updatePreview();
+function init() {
+  applyCaptureMode();
+  setFormValues(styleData[activeStyle]);
+  syncTemplateReferences();
+  syncCompanyAddress();
+  syncAmounts();
+  applyFormMode(activeStyle);
+  renderPreview();
 }
 
-form.addEventListener("input", handleFormUpdate);
-form.addEventListener("change", handleFormUpdate);
-newOrderBtn.addEventListener("click", newOrder);
+form.addEventListener("input", updateAll);
+form.addEventListener("change", updateAll);
 resetDemoBtn.addEventListener("click", resetDemo);
+newIdBtn.addEventListener("click", newDocumentId);
+timeNowBtn.addEventListener("click", setCurrentTime);
+randomDocumentIdBtn.addEventListener("click", newDocumentId);
 randomPayerIdBtn.addEventListener("click", randomizePayerId);
-randomPayerRefBtn.addEventListener("click", randomizePayerReference);
 exportPngBtn.addEventListener("click", exportPng);
 exportPdfBtn.addEventListener("click", exportPdf);
 
-applyCaptureMode();
-resetDemo();
-
-if (!form.elements.startedAt.value || !form.elements.completedAt.value) {
-  const now = new Date();
-  const done = new Date(now.getTime() + 45 * 60 * 1000);
-  form.elements.startedAt.value = toLocalInputValue(now);
-  form.elements.completedAt.value = toLocalInputValue(done);
-  updatePreview();
-}
+init();

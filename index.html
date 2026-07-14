@@ -3,19 +3,20 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>出款凭证生成器</title>
-    <link rel="stylesheet" href="styles.css?v=20260710b" />
+    <title>水单生成器</title>
+    <link rel="stylesheet" href="styles.css?v=20260714" />
   </head>
   <body>
     <main class="app-shell">
       <section class="toolbar" aria-label="生成器操作">
         <div>
-          <h1>出款凭证生成器</h1>
-          <p>根据你司真实出款记录生成付款确认单，用于客户回执、出款确认和内部留档。</p>
+          <h1>水单生成器</h1>
+          <p>根据公司真实出款记录生成付款确认文件，支持图片和 PDF 导出。</p>
         </div>
         <div class="actions">
           <button type="button" class="secondary" id="resetDemoBtn">恢复默认</button>
-          <button type="button" class="secondary" id="newOrderBtn">重新编号</button>
+          <button type="button" class="secondary" id="newIdBtn">重新编号</button>
+          <button type="button" class="secondary" id="timeNowBtn">当前时间</button>
           <button type="button" id="exportPngBtn">导出图片</button>
           <button type="button" id="exportPdfBtn">导出 PDF</button>
         </div>
@@ -25,53 +26,70 @@
         <form class="panel controls" id="receiptForm">
           <div class="form-section">
             <div class="section-title">
-              <h2>交易信息</h2>
-              <span>状态、方式、币种用选择，其余按实际展示填写</span>
+              <h2>模板与编号</h2>
             </div>
-            <label>
-              <span>凭证语言</span>
-              <select name="language">
-                <option value="zh">中文</option>
-                <option value="en">English</option>
-              </select>
-            </label>
-            <label>
-              <span>主体风格</span>
-              <select name="receiptStyle">
-                <option value="table">交易详情表格版</option>
-                <option value="voucher">付款凭证版</option>
-              </select>
-            </label>
-            <label data-form-style="table">
-              <span>交易状态</span>
-              <select name="status">
-                <option>处理中</option>
-                <option>已完成</option>
-                <option>待确认</option>
-                <option>已取消</option>
-              </select>
-            </label>
-            <label>
-              <span>订单编号</span>
-              <input name="orderNo" inputmode="numeric" maxlength="24" />
-            </label>
             <div class="field-grid two">
               <label>
-                <span>交易发起日期</span>
+                <span>凭证语言</span>
+                <select name="language">
+                  <option value="zh">中文</option>
+                  <option value="en">English</option>
+                </select>
+              </label>
+              <label>
+                <span>水单主体</span>
+                <select name="receiptStyle">
+                  <option value="gc">1 GC模版</option>
+                  <option value="jialian">2 嘉联模版</option>
+                  <option value="uq">3 UQ模版</option>
+                  <option value="py">4 PY模版</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              <span id="documentIdLabel">凭证编号</span>
+              <div class="input-action">
+                <input name="documentId" maxlength="40" />
+                <button type="button" class="secondary mini" id="randomDocumentIdBtn">随机</button>
+              </div>
+            </label>
+            <div class="field-grid three">
+              <label>
+                <span>生成日期</span>
+                <input name="documentDate" type="date" />
+              </label>
+              <label>
+                <span>创建时间</span>
                 <input name="startedAt" type="datetime-local" step="1" />
               </label>
               <label>
-                <span>交易完成日期</span>
+                <span>完成时间</span>
                 <input name="completedAt" type="datetime-local" step="1" />
               </label>
             </div>
+            <div class="field-grid two" data-templates="uq">
+              <label>
+                <span>出款日期</span>
+                <input name="payoutDate" type="date" />
+              </label>
+              <label>
+                <span>完成日期</span>
+                <input name="completeDate" type="date" />
+              </label>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-title">
+              <h2>交易金额</h2>
+            </div>
             <div class="field-grid three">
               <label>
-                <span>金额</span>
+                <span id="amountLabel">付款金额</span>
                 <input name="amount" type="number" min="0" step="0.01" />
               </label>
               <label>
-                <span>支付币种</span>
+                <span>付款币种</span>
                 <select name="payCurrency">
                   <option>CNH</option>
                   <option>USD</option>
@@ -91,15 +109,8 @@
             </div>
             <div class="field-grid three">
               <label>
-                <span>支付方式</span>
-                <select name="paymentMethod">
-                  <option>SWIFT</option>
-                  <option>CHATS</option>
-                  <option>Bank Transfer</option>
-                  <option>Telegraphic Transfer</option>
-                  <option>FPS</option>
-                  <option>Wallet Transfer</option>
-                </select>
+                <span>收款金额</span>
+                <input name="receiveAmount" type="number" min="0" step="0.01" />
               </label>
               <label>
                 <span>手续费</span>
@@ -115,36 +126,81 @@
                 </select>
               </label>
             </div>
-            <label>
-              <span>交易附言</span>
-              <input name="memo" maxlength="120" placeholder="例如 Invoice 20260702 / Contract payment" />
-            </label>
+            <div class="field-grid three">
+              <label>
+                <span>支付方式</span>
+                <select name="paymentMethod">
+                  <option>SWIFT</option>
+                  <option>CHATS</option>
+                  <option>FPS</option>
+                  <option>Bank Transfer</option>
+                  <option>Telegraphic Transfer</option>
+                  <option>Wallet Transfer</option>
+                </select>
+              </label>
+              <label>
+                <span>付款状态</span>
+                <select name="status">
+                  <option>处理中</option>
+                  <option>已完成</option>
+                  <option>待确认</option>
+                  <option>已取消</option>
+                  <option>Success</option>
+                  <option>Pending</option>
+                  <option>Processing</option>
+                </select>
+              </label>
+              <label data-templates="jialian">
+                <span>汇率</span>
+                <input name="exchangeRate" maxlength="20" />
+              </label>
+            </div>
+            <div class="field-grid two">
+              <label>
+                <span id="purposeLabel">付款原因</span>
+                <input name="paymentPurpose" maxlength="100" />
+              </label>
+              <label>
+                <span id="memoLabel">备注/附言</span>
+                <input name="memo" maxlength="140" />
+              </label>
+            </div>
           </div>
 
           <div class="form-section">
             <div class="section-title">
               <h2>付款方</h2>
             </div>
-            <label data-form-style="table">
+            <label>
               <span>付款方名称</span>
-              <input name="payerNameTable" maxlength="80" />
+              <input name="payerName" list="payerCompanyOptions" maxlength="120" />
+              <datalist id="payerCompanyOptions">
+                <option value="LOCAL OPTION TECH LIMITED"></option>
+                <option value="NO FIVE CONSOLIDATE IMPORT & EXPORT CO., LIMITED"></option>
+                <option value="MONOLITH TECHNOLOGY LIMITED"></option>
+                <option value="STARPORT TRADING LIMITED"></option>
+                <option value="CLICKBRIDGE TECHNOLOGY LIMITED"></option>
+                <option value="MAYGOGH TRADING CO., LIMITED"></option>
+              </datalist>
             </label>
-            <label data-form-style="voucher">
-              <span>付款公司</span>
-              <select name="payerNameVoucher">
-                <option>LOCAL OPTION TECH LIMITED</option>
-                <option>NO FIVE CONSOLIDATE IMPORT & EXPORT CO., LIMITED</option>
-                <option>MONOLITH TECHNOLOGY LIMITED</option>
-                <option>STARPORT TRADING LIMITED</option>
-                <option>CLICKBRIDGE TECHNOLOGY LIMITED</option>
-                <option>MAYGOGH TRADING CO., LIMITED</option>
-              </select>
+            <label data-templates="uq">
+              <span>付款方地址</span>
+              <textarea name="payerAddress" rows="3" maxlength="220"></textarea>
             </label>
-            <label data-form-style="voucher">
-              <span>主体地址</span>
-              <textarea name="payerAddress" rows="3" maxlength="180"></textarea>
-            </label>
-            <div class="field-grid two" data-form-style="table">
+            <div class="field-grid two" data-templates="uq">
+              <label>
+                <span>主体类型</span>
+                <select name="payerEntityType">
+                  <option>COMPANY</option>
+                  <option>INDIVIDUAL</option>
+                </select>
+              </label>
+              <label>
+                <span>Payout Reference</span>
+                <input name="payerReference" maxlength="120" />
+              </label>
+            </div>
+            <div class="field-grid two" data-templates="gc">
               <label>
                 <span>编号标签</span>
                 <select name="payerIdLabel">
@@ -161,16 +217,9 @@
                 </div>
               </label>
             </div>
-            <label data-form-style="table">
+            <label data-templates="gc">
               <span>付款参考号</span>
-              <div class="input-action">
-                <input name="payerRef" maxlength="40" readonly />
-                <button type="button" class="secondary mini" id="randomPayerRefBtn">同订单</button>
-              </div>
-            </label>
-            <label data-form-style="table">
-              <span>付款方验证文案</span>
-              <input name="payerVerify" maxlength="80" />
+              <input name="payerRef" maxlength="40" readonly />
             </label>
           </div>
 
@@ -180,18 +229,34 @@
             </div>
             <label>
               <span>收款方名称</span>
-              <input name="recipientName" maxlength="80" />
+              <input name="recipientName" maxlength="130" />
             </label>
-            <label data-form-style="voucher">
-              <span>SWIFT CODE</span>
-              <input name="recipientSwift" maxlength="40" />
-            </label>
-            <label data-form-style="voucher">
-              <span>收款银行</span>
-              <input name="recipientBank" maxlength="100" />
+            <label data-templates="uq">
+              <span>收款方地址</span>
+              <textarea name="recipientAddress" rows="3" maxlength="260"></textarea>
             </label>
             <div class="field-grid two">
-              <label data-form-style="table">
+              <label>
+                <span>银行名称</span>
+                <input name="recipientBank" maxlength="140" />
+              </label>
+              <label>
+                <span>银行账号</span>
+                <input name="recipientAccount" maxlength="60" />
+              </label>
+            </div>
+            <div class="field-grid two">
+              <label>
+                <span>SWIFT / Routing</span>
+                <input name="recipientSwift" maxlength="60" />
+              </label>
+              <label data-templates="jialian">
+                <span>Routing Number</span>
+                <input name="routingNumber" maxlength="60" />
+              </label>
+            </div>
+            <div class="field-grid two" data-templates="gc">
+              <label>
                 <span>账户标签</span>
                 <select name="recipientAccountLabel">
                   <option>账户号码</option>
@@ -201,217 +266,26 @@
                 </select>
               </label>
               <label>
-                <span>账户号码</span>
-                <input name="recipientAccount" maxlength="40" />
+                <span>收款方类型</span>
+                <select name="recipientType">
+                  <option>Individual</option>
+                  <option>Company</option>
+                </select>
               </label>
             </div>
-            <label data-form-style="table">
-              <span>收款方类型</span>
-              <select name="recipientType">
-                <option>Individual</option>
-                <option>Company</option>
-              </select>
-            </label>
-            <label data-form-style="table">
-              <span>收款方验证文案</span>
-              <input name="recipientVerify" maxlength="80" />
-            </label>
-          </div>
-
-          <div class="form-section">
-            <div class="section-title">
-              <h2>收款摘要</h2>
-            </div>
-            <label>
-              <span>收款金额</span>
-              <input name="receiveAmount" type="number" min="0" step="0.01" />
-            </label>
           </div>
         </form>
 
-        <section class="preview-column" aria-label="出款凭证预览">
+        <section class="preview-column" aria-label="水单预览">
           <div class="preview-head">
             <h2>实时预览</h2>
             <span id="saveState">已同步</span>
           </div>
-          <article class="receipt" id="receiptPreview" data-style-panel="table">
-            <header class="receipt-top">
-              <div><span data-i18n="statusLabel">交易状态:</span> <strong data-preview="status"></strong></div>
-              <div><span data-i18n="orderNoLabel">订单编号:</span> <strong data-preview="orderNo"></strong></div>
-            </header>
-
-            <section class="receipt-section">
-              <h3 data-i18n="transactionDetails">交易详情</h3>
-              <div class="detail-table">
-                <div class="detail-row">
-                  <span data-i18n="startedAt">交易发起日期</span>
-                  <strong data-preview="startedAtDisplay"></strong>
-                </div>
-                <div class="detail-row">
-                  <span data-i18n="completedAt">交易完成日期</span>
-                  <strong data-preview="completedAtDisplay"></strong>
-                </div>
-                <div class="detail-row">
-                  <span data-i18n="amount">金额</span>
-                  <strong data-preview="amountDisplay"></strong>
-                </div>
-                <div class="detail-row">
-                  <span data-i18n="paymentMethod">支付方式</span>
-                  <strong data-preview="paymentMethod"></strong>
-                </div>
-                <div class="detail-row">
-                  <span data-i18n="fee">手续费</span>
-                  <strong data-preview="feeDisplay"></strong>
-                </div>
-                <div class="detail-row">
-                  <span data-i18n="memo">交易附言</span>
-                  <strong data-preview="memo"></strong>
-                </div>
-              </div>
-            </section>
-
-            <section class="party-grid">
-              <div class="receipt-section">
-                <h3 data-i18n="payer">付款方</h3>
-                <div class="party-card">
-                  <strong class="party-name" data-preview="payerName"></strong>
-                  <span class="label-line" data-preview="payerIdLabelDisplay"></span>
-                  <strong data-preview="payerId"></strong>
-                  <span class="label-line" data-i18n="paymentReference">付款参考号:</span>
-                  <strong data-preview="payerRef"></strong>
-                  <p data-preview="payerVerify"></p>
-                </div>
-              </div>
-              <div class="receipt-section">
-                <h3 data-i18n="recipient">收款方</h3>
-                <div class="party-card">
-                  <strong class="party-name" data-preview="recipientName"></strong>
-                  <span class="label-line" data-preview="recipientAccountLabelDisplay"></span>
-                  <strong data-preview="recipientAccount"></strong>
-                  <span class="label-line" data-i18n="recipientType">收款方类型:</span>
-                  <strong data-preview="recipientType"></strong>
-                  <p data-preview="recipientVerify"></p>
-                </div>
-              </div>
-            </section>
-
-            <section class="receipt-section">
-              <h3 data-i18n="paymentSummary">支付摘要</h3>
-              <div class="summary-table">
-                <div class="summary-row header">
-                  <span data-i18n="payCurrency">支付币种</span>
-                  <span data-i18n="payAmount">支付金额</span>
-                  <span data-i18n="receiveCurrency">收款币种</span>
-                  <span data-i18n="receiveAmount">收款金额</span>
-                </div>
-                <div class="summary-row">
-                  <strong data-preview="payCurrency"></strong>
-                  <strong data-preview="amountDisplay"></strong>
-                  <strong data-preview="receiveCurrency"></strong>
-                  <strong data-preview="receiveAmountDisplay"></strong>
-                </div>
-                <div class="summary-row total">
-                  <span data-i18n="totalLabel">总计:</span>
-                  <strong data-preview="amountWithCurrency"></strong>
-                  <span data-i18n="totalLabel">总计:</span>
-                  <strong data-preview="receiveAmountWithCurrency"></strong>
-                </div>
-              </div>
-            </section>
-
-          </article>
-          <article class="voucher-receipt is-hidden" id="voucherPreview" data-style-panel="voucher">
-            <header class="voucher-top">
-              <div class="voucher-meta">
-                <div>
-                  <span data-i18n="serialNo">交易流水号</span>
-                  <strong data-preview="orderNo"></strong>
-                </div>
-                <div>
-                  <span data-i18n="issuedAt">签发日期</span>
-                  <strong data-preview="issueDateDisplay"></strong>
-                </div>
-                <div>
-                  <span data-i18n="timezone">时区</span>
-                  <strong data-preview="timezoneDisplay"></strong>
-                </div>
-              </div>
-            </header>
-
-            <section class="voucher-section">
-              <h2 data-i18n="voucherTitle">付款凭证</h2>
-            </section>
-
-            <section class="voucher-section">
-              <h3 data-i18n="paymentDetails">付款明细</h3>
-              <div class="voucher-grid">
-                <div>
-                  <span data-i18n="paymentAmount">付款金额</span>
-                  <strong data-preview="paymentAmountWithCurrency"></strong>
-                </div>
-                <div>
-                  <span data-i18n="fee">费用</span>
-                  <strong data-preview="feeDisplay"></strong>
-                </div>
-                <div>
-                  <span data-i18n="receiveAmount">收款金额</span>
-                  <strong data-preview="receiveAmountWithCurrency"></strong>
-                </div>
-                <div>
-                  <span data-i18n="transactionTime">交易时间</span>
-                  <strong data-preview="startedAtVoucher"></strong>
-                </div>
-                <div>
-                  <span data-i18n="completedTime">完成时间</span>
-                  <strong data-preview="completedAtVoucher"></strong>
-                </div>
-                <div>
-                  <span data-i18n="remittanceMemo">汇款附言</span>
-                  <strong data-preview="memo"></strong>
-                </div>
-              </div>
-            </section>
-
-            <section class="voucher-section">
-              <h3 data-i18n="recipient">收款方</h3>
-              <div class="voucher-grid">
-                <div>
-                  <span data-i18n="name">名称</span>
-                  <strong data-preview="recipientName"></strong>
-                </div>
-                <div>
-                  <span data-i18n="bank">银行</span>
-                  <strong data-preview="recipientBankDisplay"></strong>
-                </div>
-                <div>
-                  <span data-i18n="bankAccount">银行账号</span>
-                  <strong data-preview="recipientAccount"></strong>
-                </div>
-                <div>
-                  <span>SWIFT CODE</span>
-                  <strong data-preview="recipientSwift"></strong>
-                </div>
-              </div>
-            </section>
-
-            <section class="voucher-section">
-              <h3 data-i18n="payer">付款方</h3>
-              <div class="voucher-grid">
-                <div class="wide">
-                  <span data-i18n="payerName">付款人名称</span>
-                  <strong data-preview="payerName"></strong>
-                </div>
-                <div class="wide">
-                  <span data-i18n="businessAddress">经营地址</span>
-                  <strong data-preview="payerAddress"></strong>
-                </div>
-              </div>
-            </section>
-          </article>
+          <article id="previewSurface" class="paper"></article>
         </section>
       </section>
     </main>
 
-    <script src="app.js?v=20260710b"></script>
+    <script src="app.js?v=20260714"></script>
   </body>
 </html>
