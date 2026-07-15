@@ -775,6 +775,7 @@ function renderUq(data) {
       <div class="uq-grid">
         ${field("Payer Name", data.payerName)}
         ${field("Entity Type", data.payerEntityType)}
+        ${field("Address", data.payerAddress, "doc-wide")}
       </div>
     </section>
     <footer class="uq-footer">Page 1 of 1</footer>
@@ -1191,6 +1192,8 @@ function drawUqCanvas(data) {
   y += 58;
   drawLabelValue(ctx, "Payer Name", data.payerName, margin, y, colW, uqField);
   drawLabelValue(ctx, "Entity Type", data.payerEntityType, rightX, y, colW, uqField);
+  y += 70;
+  drawLabelValue(ctx, "Address", data.payerAddress, margin, y, colW * 2 + 80, { ...uqField, maxLines: 2 });
   ctx.fillStyle = "#f2f3f5";
   ctx.fillRect(0, height - 130, width, 130);
   drawText(ctx, "Page 1 of 1", width - 120, height - 84, { size: 18, align: "right" });
