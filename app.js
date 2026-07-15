@@ -768,7 +768,6 @@ function renderUq(data) {
         ${field("Bank Name", data.recipientBank)}
         ${field("Swift Code", data.recipientSwift)}
         ${field("Account Number", data.recipientAccount)}
-        ${field("Address", data.recipientAddress, "doc-wide")}
       </div>
     </section>
     <section class="uq-section">
@@ -776,7 +775,6 @@ function renderUq(data) {
       <div class="uq-grid">
         ${field("Payer Name", data.payerName)}
         ${field("Entity Type", data.payerEntityType)}
-        ${field("Address", data.payerAddress, "doc-wide")}
       </div>
     </section>
     <footer class="uq-footer">Page 1 of 1</footer>
@@ -965,7 +963,7 @@ function drawLabelValue(ctx, label, value, x, y, width, options = {}) {
   drawWrapped(ctx, value, x, y + labelSize + 10, width, {
     size: valueSize,
     weight: options.weight || 700,
-    lineHeight: valueSize + 8,
+    lineHeight: options.lineHeight || valueSize + 8,
     maxLines: options.maxLines || 2
   });
 }
@@ -1161,41 +1159,38 @@ function drawUqCanvas(data) {
   const margin = 120;
   const rightX = margin + 515;
   const colW = 430;
+  const uqField = { labelSize: 19, valueSize: 21, lineHeight: 28 };
   drawLabelValue(ctx, "Reference ID", data.documentId, width - 510, 48, 220, { labelSize: 20, valueSize: 22 });
   drawLabelValue(ctx, "Complete Date", data.completeDateDisplay, width - 260, 48, 160, { labelSize: 20, valueSize: 22 });
-  drawText(ctx, "Payout Confirmation", margin, 150, { size: 40, weight: 700 });
-  drawText(ctx, "Payout Detail", margin, 260, { size: 31, weight: 700 });
+  drawText(ctx, "Payout Confirmation", margin, 150, { size: 38, weight: 700 });
+  drawText(ctx, "Payout Detail", margin, 260, { size: 29, weight: 700 });
   let y = 320;
-  drawLabelValue(ctx, "Amount Paid", data.amountText, margin, y, colW);
-  drawLabelValue(ctx, "Amount Received", data.receiveAmountText, rightX, y, colW);
+  drawLabelValue(ctx, "Amount Paid", data.amountText, margin, y, colW, uqField);
+  drawLabelValue(ctx, "Amount Received", data.receiveAmountText, rightX, y, colW, uqField);
   y += 70;
-  drawLabelValue(ctx, "Create Time", data.startedAtDisplay, margin, y, colW);
-  drawLabelValue(ctx, "Payout Date", data.payoutDateDisplay, rightX, y, colW);
+  drawLabelValue(ctx, "Create Time", data.startedAtDisplay, margin, y, colW, uqField);
+  drawLabelValue(ctx, "Payout Date", data.payoutDateDisplay, rightX, y, colW, uqField);
   y += 70;
-  drawLabelValue(ctx, "Complete Time", data.completedAtDisplay, margin, y, colW);
-  drawLabelValue(ctx, "Payout Status", data.statusText, rightX, y, colW);
+  drawLabelValue(ctx, "Complete Time", data.completedAtDisplay, margin, y, colW, uqField);
+  drawLabelValue(ctx, "Payout Status", data.statusText, rightX, y, colW, uqField);
   y += 70;
-  drawLabelValue(ctx, "Payout Reason", data.paymentPurposeText, margin, y, colW);
-  drawLabelValue(ctx, "Payment Method", data.paymentMethodDisplay, rightX, y, colW);
+  drawLabelValue(ctx, "Payout Reason", data.paymentPurposeText, margin, y, colW, uqField);
+  drawLabelValue(ctx, "Payment Method", data.paymentMethodDisplay, rightX, y, colW, uqField);
   y += 70;
-  drawLabelValue(ctx, "Payout Reference", data.payerReference, margin, y, colW * 2);
+  drawLabelValue(ctx, "Payout Reference", data.payerReference, margin, y, colW * 2, uqField);
   y += 120;
-  drawText(ctx, "Receipt Detail", margin, y, { size: 31, weight: 700 });
+  drawText(ctx, "Receipt Detail", margin, y, { size: 29, weight: 700 });
   y += 58;
-  drawLabelValue(ctx, "Recipient Name", data.recipientName, margin, y, colW);
-  drawLabelValue(ctx, "Bank Name", data.recipientBank, rightX, y, colW);
+  drawLabelValue(ctx, "Recipient Name", data.recipientName, margin, y, colW, uqField);
+  drawLabelValue(ctx, "Bank Name", data.recipientBank, rightX, y, colW, uqField);
   y += 70;
-  drawLabelValue(ctx, "Swift Code", data.recipientSwift, margin, y, colW);
-  drawLabelValue(ctx, "Account Number", data.recipientAccount, rightX, y, colW);
-  y += 70;
-  drawLabelValue(ctx, "Address", data.recipientAddress, margin, y, colW * 2 + 80, { maxLines: 3 });
-  y += 150;
-  drawText(ctx, "Payer Detail", margin, y, { size: 31, weight: 700 });
+  drawLabelValue(ctx, "Swift Code", data.recipientSwift, margin, y, colW, uqField);
+  drawLabelValue(ctx, "Account Number", data.recipientAccount, rightX, y, colW, uqField);
+  y += 120;
+  drawText(ctx, "Payer Detail", margin, y, { size: 29, weight: 700 });
   y += 58;
-  drawLabelValue(ctx, "Payer Name", data.payerName, margin, y, colW);
-  drawLabelValue(ctx, "Entity Type", data.payerEntityType, rightX, y, colW);
-  y += 70;
-  drawLabelValue(ctx, "Address", data.payerAddress, margin, y, colW * 2 + 80, { maxLines: 3 });
+  drawLabelValue(ctx, "Payer Name", data.payerName, margin, y, colW, uqField);
+  drawLabelValue(ctx, "Entity Type", data.payerEntityType, rightX, y, colW, uqField);
   ctx.fillStyle = "#f2f3f5";
   ctx.fillRect(0, height - 130, width, 130);
   drawText(ctx, "Page 1 of 1", width - 120, height - 84, { size: 18, align: "right" });
@@ -1205,43 +1200,44 @@ function drawUqCanvas(data) {
 function drawPyCanvas(data) {
   const { canvas, ctx, width } = createCanvas();
   const margin = 72;
-  drawText(ctx, "Transfer Notice", margin, 230, { size: 50, weight: 700 });
-  drawText(ctx, "Transaction ID", width - margin, 200, { size: 27, color: "#687082", align: "right", maxWidth: 620 });
-  drawText(ctx, data.documentId, width - margin, 242, { size: 29, weight: 500, align: "right", maxWidth: 620 });
+  const pyField = { labelSize: 18, valueSize: 21, weight: 500, lineHeight: 27 };
+  drawText(ctx, "Transfer Notice", margin, 230, { size: 38, weight: 700 });
+  drawText(ctx, "Transaction ID", width - margin, 206, { size: 18, color: "#687082", align: "right", maxWidth: 620 });
+  drawText(ctx, data.documentId, width - margin, 236, { size: 21, weight: 500, align: "right", maxWidth: 620 });
   function card(x, y, h, title) {
     ctx.strokeStyle = "#dfe3eb";
     ctx.strokeRect(x, y, width - margin * 2, h);
-    drawText(ctx, title, x + 40, y + 46, { size: 40, weight: 700 });
+    drawText(ctx, title, x + 40, y + 38, { size: 28, weight: 700 });
   }
   const left = margin + 40;
   const right = margin + 520;
   const colW = 450;
   card(margin, 322, 640, "Payment details");
-  let y = 436;
-  drawLabelValue(ctx, "Amount paid", data.amountText, left, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
-  drawLabelValue(ctx, "Amount received", data.receiveAmountText, right, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
-  y += 98;
-  drawLabelValue(ctx, "Transaction fee", data.feeText, left, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
-  drawLabelValue(ctx, "Payment method", data.paymentMethodDisplay, right, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
-  y += 98;
-  drawLabelValue(ctx, "Creation time", data.startedAtDisplay, left, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
-  drawLabelValue(ctx, "Payment time", data.completedAtDisplay, right, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
-  y += 98;
-  drawLabelValue(ctx, "Payment Status", data.statusText, left, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
-  drawLabelValue(ctx, "Payment note", data.memo || "-", right, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
-  y += 98;
-  drawLabelValue(ctx, "Payer Name", data.payerName, left, y, colW * 2, { labelSize: 27, valueSize: 31, weight: 500, maxLines: 2 });
+  let y = 424;
+  drawLabelValue(ctx, "Amount paid", data.amountText, left, y, colW, pyField);
+  drawLabelValue(ctx, "Amount received", data.receiveAmountText, right, y, colW, pyField);
+  y += 80;
+  drawLabelValue(ctx, "Transaction fee", data.feeText, left, y, colW, pyField);
+  drawLabelValue(ctx, "Payment method", data.paymentMethodDisplay, right, y, colW, pyField);
+  y += 80;
+  drawLabelValue(ctx, "Creation time", data.startedAtDisplay, left, y, colW, pyField);
+  drawLabelValue(ctx, "Payment time", data.completedAtDisplay, right, y, colW, pyField);
+  y += 80;
+  drawLabelValue(ctx, "Payment Status", data.statusText, left, y, colW, pyField);
+  drawLabelValue(ctx, "Payment note", data.memo || "-", right, y, colW, pyField);
+  y += 80;
+  drawLabelValue(ctx, "Payer Name", data.payerName, left, y, colW * 2, { ...pyField, maxLines: 2 });
   card(margin, 998, 354, "Recipient Information");
-  y = 1122;
-  drawLabelValue(ctx, "Account Name", data.recipientName, left, y, colW, { labelSize: 27, valueSize: 31, weight: 500, maxLines: 2 });
-  drawLabelValue(ctx, "Bank Account Number", data.recipientAccount, right, y, colW, { labelSize: 27, valueSize: 31, weight: 500, maxLines: 2 });
-  y += 104;
-  drawLabelValue(ctx, "Bank Name", data.recipientBank, left, y, colW, { labelSize: 27, valueSize: 31, weight: 500, maxLines: 2 });
-  drawLabelValue(ctx, "Swift Remittance Routing Number", data.recipientSwift, right, y, colW, { labelSize: 27, valueSize: 31, weight: 500 });
+  y = 1114;
+  drawLabelValue(ctx, "Account Name", data.recipientName, left, y, colW, { ...pyField, maxLines: 2 });
+  drawLabelValue(ctx, "Bank Account Number", data.recipientAccount, right, y, colW, { ...pyField, maxLines: 2 });
+  y += 88;
+  drawLabelValue(ctx, "Bank Name", data.recipientBank, left, y, colW, { ...pyField, maxLines: 2 });
+  drawLabelValue(ctx, "Swift Remittance Routing Number", data.recipientSwift, right, y, colW, pyField);
   ctx.fillStyle = "#f4f4f8";
   ctx.fillRect(margin, 1400, width - margin * 2, 192);
-  drawText(ctx, "1.Time zone: China / Hong Kong", margin + 30, 1440, { size: 25, color: "#667085" });
-  drawText(ctx, "2.Not including intermediary or recipient bank charges", margin + 30, 1480, { size: 25, color: "#667085" });
+  drawText(ctx, "1.Time zone: China / Hong Kong", margin + 30, 1440, { size: 18, color: "#667085" });
+  drawText(ctx, "2.Not including intermediary or recipient bank charges", margin + 30, 1472, { size: 18, color: "#667085" });
   return canvas;
 }
 

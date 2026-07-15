@@ -520,7 +520,7 @@ input[readonly] {
 
 .uq-title {
   margin: 0 0 48px;
-  font-size: 36px;
+  font-size: 34px;
   line-height: 1.1;
 }
 
@@ -530,7 +530,7 @@ input[readonly] {
 
 .uq-section h3 {
   margin: 0 0 22px;
-  font-size: 27px;
+  font-size: 25px;
   line-height: 1.2;
 }
 
@@ -538,17 +538,29 @@ input[readonly] {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: 88px;
-  row-gap: 18px;
+  row-gap: 16px;
+}
+
+.uq-grid > div {
+  min-height: 50px;
 }
 
 .uq-grid .doc-label {
   color: #222;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .uq-grid .doc-value,
 .uq-meta .doc-value {
-  font-size: 17px;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.uq-grid .doc-value {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .uq-footer {
@@ -560,22 +572,23 @@ input[readonly] {
 }
 
 .py-paper {
-  padding: 150px 72px 72px;
+  padding: 128px 72px 72px;
   font-family: Arial, Helvetica, sans-serif;
 }
 
 .py-header {
   display: grid;
-  grid-template-columns: 1fr 520px;
+  grid-template-columns: minmax(300px, 1fr) 360px;
   align-items: start;
   gap: 24px;
-  margin-bottom: 46px;
+  margin-bottom: 36px;
 }
 
 .py-title {
   margin: 0;
-  font-size: 43px;
+  font-size: 32px;
   line-height: 1.1;
+  white-space: nowrap;
 }
 
 .py-meta {
@@ -584,11 +597,11 @@ input[readonly] {
 
 .py-meta .doc-label {
   color: #6b7283;
-  font-size: 22px;
+  font-size: 14px;
 }
 
 .py-meta .doc-value {
-  font-size: 24px;
+  font-size: 15px;
   font-weight: 500;
   overflow-wrap: normal;
   white-space: nowrap;
@@ -596,39 +609,53 @@ input[readonly] {
 
 .py-card {
   border: 1px solid #dfe3eb;
-  padding: 42px 38px 36px;
-  margin-bottom: 34px;
+  padding: 30px 36px 30px;
+  margin-bottom: 26px;
 }
 
 .py-card h3 {
-  margin: 0 0 30px;
-  font-size: 33px;
+  margin: 0 0 22px;
+  font-size: 23px;
   line-height: 1.15;
 }
 
 .py-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 82px;
-  row-gap: 20px;
+  column-gap: 60px;
+  row-gap: 14px;
+}
+
+.py-grid > div {
+  min-height: 48px;
+}
+
+.py-grid .doc-wide {
+  min-height: 58px;
 }
 
 .py-grid .doc-label {
   color: #6b7283;
-  font-size: 22px;
+  font-size: 14px;
 }
 
 .py-grid .doc-value {
-  font-size: 24px;
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 16px;
   font-weight: 500;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .py-note {
-  margin-top: 48px;
-  padding: 32px;
+  margin-top: 32px;
+  padding: 22px 28px;
   color: #667085;
   background: #f4f4f8;
-  font-size: 20px;
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 body.capture-preview {
