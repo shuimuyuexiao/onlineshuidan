@@ -216,6 +216,14 @@ input[readonly] {
   overflow: auto;
 }
 
+.preview-column.style-jialian {
+  padding-left: 0;
+}
+
+.preview-column.style-jialian .preview-head {
+  padding-left: 18px;
+}
+
 .preview-head {
   display: flex;
   align-items: center;
@@ -352,6 +360,11 @@ input[readonly] {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 32px;
+  align-items: stretch;
+}
+
+.gc-party-grid > div {
+  min-width: 0;
 }
 
 .gc-party-title {
@@ -361,24 +374,47 @@ input[readonly] {
 }
 
 .gc-party-card {
-  min-height: 176px;
+  min-height: 184px;
   border: 1px solid #d9dee7;
-  border-radius: 4px;
-  padding: 20px 20px 18px;
+  border-radius: 3px;
+  padding: 18px 20px;
+  display: grid;
+  grid-template-rows: minmax(48px, auto) repeat(2, 48px);
+  row-gap: 10px;
+  align-content: start;
 }
 
 .gc-party-name {
-  margin: 0 0 14px;
+  margin: 0;
+  min-height: 48px;
   color: #111;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 500;
-  line-height: 1.35;
+  line-height: 1.32;
   overflow-wrap: anywhere;
   white-space: normal;
 }
 
+.gc-party-line {
+  display: grid;
+  align-content: start;
+  min-height: 48px;
+  row-gap: 3px;
+}
+
+.gc-party-card .doc-label,
+.gc-party-card .doc-value {
+  margin: 0;
+}
+
 .gc-party-card .doc-label {
-  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.gc-party-card .doc-value {
+  font-size: 15px;
+  line-height: 1.35;
 }
 
 .gc-summary-row {
@@ -415,15 +451,17 @@ input[readonly] {
 }
 
 .jl-paper {
-  padding: 46px 94px;
+  margin-left: 0;
+  margin-right: auto;
+  padding: 46px 112px 46px 72px;
   font-family: Arial, Helvetica, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 .jl-meta {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 44px;
-  width: 360px;
+  grid-template-columns: 250px 150px;
+  gap: 34px;
+  width: 434px;
   margin-left: auto;
   margin-bottom: 90px;
 }
@@ -459,6 +497,11 @@ input[readonly] {
 .jl-grid .doc-value,
 .jl-meta .doc-value {
   font-size: 17px;
+}
+
+.jl-meta .doc-value {
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 
 .uq-paper {
@@ -523,9 +566,9 @@ input[readonly] {
 
 .py-header {
   display: grid;
-  grid-template-columns: 1fr 420px;
+  grid-template-columns: 1fr 520px;
   align-items: start;
-  gap: 40px;
+  gap: 24px;
   margin-bottom: 46px;
 }
 
@@ -545,8 +588,10 @@ input[readonly] {
 }
 
 .py-meta .doc-value {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 500;
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 
 .py-card {

@@ -1,4 +1,5 @@
 const form = document.querySelector("#receiptForm");
+const previewColumn = document.querySelector(".preview-column");
 const previewSurface = document.querySelector("#previewSurface");
 const saveState = document.querySelector("#saveState");
 const resetDemoBtn = document.querySelector("#resetDemoBtn");
@@ -421,10 +422,14 @@ function setFormValues(values) {
     const field = form.elements[key];
     if (field) field.value = value ?? "";
   });
+  syncPayerControlsFromName(values.payerName || "");
 }
 
 function getStyleValues() {
-  return getFormData();
+  const values = getFormData();
+  delete values.payerNameText;
+  delete values.payerCompanySelect;
+  return values;
 }
 
 function getData() {
@@ -486,6 +491,26 @@ function syncTemplateReferences() {
   if (activeStyle === "uq" && !form.elements.payerReference.value) {
     form.elements.payerReference.value = form.elements.payerName.value;
   }
+}
+
+function findPayerCompanyKey(name) {
+  const target = String(name || "").trim().toUpperCase();
+  return Object.keys(payerCompanies).find((company) => company.toUpperCase() === target) || "";
+}
+
+function syncPayerControlsFromName(name) {
+  const value = String(name || "");
+  if (form.elements.payerNameText) form.elements.payerNameText.value = value;
+  if (form.elements.payerCompanySelect) {
+    const company = findPayerCompanyKey(value);
+    if (company) form.elements.payerCompanySelect.value = company;
+  }
+}
+
+function setPayerName(value, options = {}) {
+  form.elements.payerName.value = value || "";
+  syncPayerControlsFromName(value);
+  syncCompanyAddress(options);
 }
 
 function syncCompanyAddress({ force = false } = {}) {
@@ -609,20 +634,28 @@ function renderGc(data) {
         <h3 class="gc-party-title">${labels.payer}</h3>
         <div class="gc-party-card">
           <div class="gc-party-name">${escapeHtml(data.payerName)}</div>
-          <div class="doc-label">${labels.payerId}</div>
-          <div class="doc-value">${escapeHtml(data.payerId)}</div>
-          <div class="doc-label">${labels.ref}</div>
-          <div class="doc-value">${escapeHtml(data.payerRef)}</div>
+          <div class="gc-party-line">
+            <div class="doc-label">${labels.payerId}</div>
+            <div class="doc-value">${escapeHtml(data.payerId)}</div>
+          </div>
+          <div class="gc-party-line">
+            <div class="doc-label">${labels.ref}</div>
+            <div class="doc-value">${escapeHtml(data.payerRef)}</div>
+          </div>
         </div>
       </div>
       <div>
         <h3 class="gc-party-title">${labels.recipient}</h3>
         <div class="gc-party-card">
           <div class="gc-party-name">${escapeHtml(data.recipientName)}</div>
-          <div class="doc-label">${labels.account}</div>
-          <div class="doc-value">${escapeHtml(data.recipientAccount)}</div>
-          <div class="doc-label">${labels.type}</div>
-          <div class="doc-value">${escapeHtml(data.recipientType)}</div>
+          <div class="gc-party-line">
+            <div class="doc-label">${labels.account}</div>
+            <div class="doc-value">${escapeHtml(data.recipientAccount)}</div>
+          </div>
+          <div class="gc-party-line">
+            <div class="doc-label">${labels.type}</div>
+            <div class="doc-value">${escapeHtml(data.recipientType)}</div>
+          </div>
         </div>
       </div>
     </section>
@@ -657,8 +690,7 @@ function renderJialian(data) {
         payee: "Payee Information",
         accountName: "Account Name",
         bankName: "Bank Name",
-        accountNo: "Bank Account Number",
-        routing: "Routing Number"
+        accountNo: "Bank Account Number"
       }
     : {
         id: "交易编号",
@@ -676,8 +708,7 @@ function renderJialian(data) {
         payee: "收款方信息",
         accountName: "账户名称",
         bankName: "银行名称",
-        accountNo: "银行账号",
-        routing: "Routing Number"
+        accountNo: "银行账号"
       };
   return `
     <div class="jl-meta">
@@ -704,7 +735,6 @@ function renderJialian(data) {
         ${field(labels.accountName, data.recipientName)}
         ${field(labels.bankName, data.recipientBank)}
         ${field(labels.accountNo, data.recipientAccount)}
-        ${field(labels.routing, data.routingNumber)}
       </div>
     </section>
   `;
@@ -789,6 +819,7 @@ function renderPy(data) {
 function renderPreview() {
   const data = getData();
   previewSurface.className = `paper ${data.receiptStyle}-paper`;
+  previewColumn.className = `preview-column style-${data.receiptStyle}`;
   document.documentElement.lang = data.language === "en" ? "en" : "zh-CN";
   if (data.receiptStyle === "gc") previewSurface.innerHTML = renderGc(data);
   if (data.receiptStyle === "jialian") previewSurface.innerHTML = renderJialian(data);
@@ -806,6 +837,13 @@ function updateAll(event) {
   }
   saveState.textContent = "同步中";
   if (event?.target?.name === "documentId") syncTemplateReferences();
+  if (event?.target?.name === "payerNameText") {
+    setPayerName(event.target.value, { force: event.type === "change" });
+    applyStoredPayerId({ clearIfMissing: event.type === "change" });
+  }
+  if (event?.target?.name === "payerCompanySelect") {
+    setPayerName(event.target.value, { force: true });
+  }
   if (event?.target?.name === "payerName") {
     syncCompanyAddress({ force: event.type === "change" });
     applyStoredPayerId({ clearIfMissing: event.type === "change" });
@@ -1009,12 +1047,16 @@ function drawGcCanvas(data) {
   const partyY = tableY + 92;
   const cardW = (width - margin * 2 - 46) / 2;
   function partyCard(x, title, name, firstLabel, firstValue, secondLabel, secondValue) {
+    const innerX = x + 28;
+    const innerW = cardW - 56;
+    const firstY = partyY + 104;
+    const secondY = partyY + 176;
     drawText(ctx, title, x, partyY - 32, { size: 23, weight: 700, color: "#344154" });
     ctx.strokeStyle = "#d9dee7";
     ctx.strokeRect(x, partyY, cardW, 258);
-    drawWrapped(ctx, name, x + 28, partyY + 28, cardW - 56, { size: 24, weight: 500, maxLines: 3 });
-    drawLabelValue(ctx, firstLabel, firstValue, x + 28, partyY + 104, cardW - 56, { labelSize: 20, valueSize: 22, weight: 500 });
-    drawLabelValue(ctx, secondLabel, secondValue, x + 28, partyY + 174, cardW - 56, { labelSize: 20, valueSize: 22, weight: 500 });
+    drawWrapped(ctx, name, innerX, partyY + 28, innerW, { size: 23, weight: 500, lineHeight: 30, maxLines: 2 });
+    drawLabelValue(ctx, firstLabel, firstValue, innerX, firstY, innerW, { labelSize: 20, valueSize: 22, weight: 500 });
+    drawLabelValue(ctx, secondLabel, secondValue, innerX, secondY, innerW, { labelSize: 20, valueSize: 22, weight: 500 });
   }
   partyCard(margin, labels.payer, data.payerName, labels.payerId, data.payerId, labels.ref, data.payerRef);
   partyCard(margin + cardW + 46, labels.recipient, data.recipientName, labels.account, data.recipientAccount, labels.type, data.recipientType);
@@ -1063,8 +1105,7 @@ function drawJialianCanvas(data) {
         payee: "Payee Information",
         accountName: "Account Name",
         bankName: "Bank Name",
-        accountNo: "Bank Account Number",
-        routing: "Routing Number"
+        accountNo: "Bank Account Number"
       }
     : {
         id: "交易编号",
@@ -1082,12 +1123,12 @@ function drawJialianCanvas(data) {
         payee: "收款方信息",
         accountName: "账户名称",
         bankName: "银行名称",
-        accountNo: "银行账号",
-        routing: "Routing Number"
+        accountNo: "银行账号"
       };
-  const margin = 144;
+  const margin = 112;
   const colW = 360;
-  drawLabelValue(ctx, labels.id, data.documentId, width - 530, 64, 250, { labelSize: 20, valueSize: 21 });
+  drawText(ctx, labels.id, width - 530, 64, { size: 20, color: "#687082", maxWidth: 310 });
+  drawText(ctx, data.documentId, width - 530, 94, { size: 21, weight: 700, maxWidth: 310 });
   drawLabelValue(ctx, labels.time, data.documentDateDot, width - 250, 64, 180, { labelSize: 20, valueSize: 21 });
   drawText(ctx, labels.title, margin, 232, { size: en ? 42 : 44, weight: 700 });
   drawText(ctx, labels.details, margin, 370, { size: 34, weight: 700 });
@@ -1112,7 +1153,6 @@ function drawJialianCanvas(data) {
   drawLabelValue(ctx, labels.bankName, data.recipientBank, right, y, colW, { maxLines: 2 });
   y += 90;
   drawLabelValue(ctx, labels.accountNo, data.recipientAccount, left, y, colW);
-  drawLabelValue(ctx, labels.routing, data.routingNumber, right, y, colW);
   return canvas;
 }
 
@@ -1166,7 +1206,8 @@ function drawPyCanvas(data) {
   const { canvas, ctx, width } = createCanvas();
   const margin = 72;
   drawText(ctx, "Transfer Notice", margin, 230, { size: 50, weight: 700 });
-  drawLabelValue(ctx, "Transaction ID", data.documentId, width - 455, 200, 390, { labelSize: 27, valueSize: 31, weight: 500 });
+  drawText(ctx, "Transaction ID", width - margin, 200, { size: 27, color: "#687082", align: "right", maxWidth: 620 });
+  drawText(ctx, data.documentId, width - margin, 242, { size: 29, weight: 500, align: "right", maxWidth: 620 });
   function card(x, y, h, title) {
     ctx.strokeStyle = "#dfe3eb";
     ctx.strokeRect(x, y, width - margin * 2, h);
